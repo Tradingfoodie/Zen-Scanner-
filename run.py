@@ -66,6 +66,10 @@ def capture_safe(fn, *a):
         return f"{fn.__name__} failed: {e}"
 
 
+if mode == "alert-test":
+    zf.send_test_alert(now)
+    sys.exit(0)
+
 if mode == "futures":
     slot = futures_slot() or "manual"
     if not manual:
