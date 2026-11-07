@@ -17,8 +17,10 @@ Data: Yahoo continuous contracts (ES=F, NQ=F, GC=F), ~10-15 min delayed. Contrac
 make price jump on the continuous chart, so setups next to a jump are skipped.
 Research tool, not trade calls."""
 import datetime as dt
+import json
 import math
 import os
+import urllib.request
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -39,6 +41,10 @@ CONTRACTS = [
     ("MGC", "GC", "GC=F", 10.0, 100.0, 0.10),
 ]
 FRAMES = [("15m", "15m", "60d"), ("1h", "60m", "180d")]   # label, Yahoo interval, history
+
+CHART_BARS = 64              # bars kept for each chart on the website
+SITE_URL = "https://tradingfoodie.github.io/Zen-Scanner-/"
+RTH = (dt.time(8, 30), dt.time(15, 0))   # New York session, Central time
 
 LAST_RUN = {}       # structured results of the latest futures scan (used by the website)
 LAST_REVIEW = None  # graded log of the latest futures review
@@ -88,6 +94,124 @@ def tick_round(x, tick):
     return round(round(x / tick) * tick, 6)
 
 
+# ---- chart data -----------------------------------------------------------------
+def chart_bars(df, n=CHART_BARS):
+    """Last n bars as [[open, high, low, close], ...] plus first/last bar time."""
+    w = df.iloc[-n:]
+    bars = [[round(float(r.Open), 4), round(float(r.High), 4), round(float(r.Low), 4),
+             round(float(r.Close), 4)] for r in w.itertuples()]
+    return dict(bars=bars, t0=w.index[0].isoformat(), t1=w.index[-1].isoformat())
+
+
+def box_span(df, top, bot, end_age):
+    """Find the box window (start, end bar offsets from the right) that box_signal used,
+    so the chart can shade exactly those bars. end_age = bars since the box ended."""
+    o, c = df["Open"], df["Close"]
+    bt, bb = np.maximum(o, c), np.minimum(o, c)
+    e = end_age
+    for L in (40, 30, 20, 15, 10):
+        if e + L > len(df):
+            continue
+        if math.isclose(float(bt.iloc[-(e + L):-e].max()), top, rel_tol=1e-9) and \
+                math.isclose(float(bb.iloc[-(e + L):-e].min()), bot, rel_tol=1e-9):
+            return e + L, e
+    return e + 20, e
+
+
+# ---- key levels -----------------------------------------------------------------
+def session_ids(idx):
+    """CME trading day of each bar: the Globex day starts at 5:00 PM Central, so
+    shifting by 7 hours puts Sunday 5 PM - Monday 4 PM on Monday."""
+    return (idx + pd.Timedelta(hours=7)).date
+
+
+def key_levels(df):
+    """Levels a night trader watches, from 15-minute bars in Central time:
+    prior Globex day high/low, the last New York session high/low/close (8:30-3:00),
+    and tonight's high/low since 5:00 PM. Plus the nearest level above and below price."""
+    if df is None or len(df) < 50:
+        return None
+    sid = pd.Series(session_ids(df.index), index=df.index)
+    days = sorted(set(sid))
+    cur = days[-1]
+    tm = pd.Series([t.time() for t in df.index], index=df.index)
+    rth_mask = (tm >= RTH[0]) & (tm < RTH[1])
+    px = float(df["Close"].iloc[-1])
+    lv = []
+    if len(days) >= 2:
+        prev = df[sid == days[-2]]
+        lv += [("Prior day high", float(prev["High"].max())), ("Prior day low", float(prev["Low"].min()))]
+    rth = df[rth_mask]
+    if len(rth):
+        last_day = rth.index[-1].date()
+        ny = rth[[t.date() == last_day for t in rth.index]]
+        lv += [("NY high", float(ny["High"].max())), ("NY low", float(ny["Low"].min())),
+               ("NY close", float(ny["Close"].iloc[-1]))]
+    tonight = df[(sid == cur) & ~rth_mask & ((tm >= dt.time(17, 0)) | (tm < RTH[0]))]
+    if len(tonight):
+        lv += [("Tonight high", float(tonight["High"].max())), ("Tonight low", float(tonight["Low"].min()))]
+    a = float(atr_series(df).iloc[-1])
+    above = [(n, v) for n, v in lv if v > px]
+    below = [(n, v) for n, v in lv if v < px]
+    up = min(above, key=lambda x: x[1]) if above else None
+    dn = max(below, key=lambda x: x[1]) if below else None
+    return dict(price=px, atr=a, levels=[dict(name=n, value=v) for n, v in lv],
+                above=dict(name=up[0], value=up[1], dist=up[1] - px) if up else None,
+                below=dict(name=dn[0], value=dn[1], dist=px - dn[1]) if dn else None,
+                bars_tonight=len(tonight), time=df.index[-1].isoformat())
+
+
+# ---- phone alerts (ntfy) --------------------------------------------------------
+def ntfy_send(topic, title, body, tags="chart_with_upwards_trend", priority="high"):
+    """Push one notification to https://ntfy.sh/<topic>. The topic is the only 'password',
+    so it comes from a GitHub secret (NTFY_TOPIC), never from the public repo."""
+    req = urllib.request.Request(f"https://ntfy.sh/{topic}", data=body.encode("utf-8"), method="POST",
+                                 headers={"Title": title, "Tags": tags, "Priority": priority,
+                                          "Click": SITE_URL})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return r.status
+
+
+def alert_text(c):
+    dec = 1 if c["contract"] == "MGC" else 2
+    f = lambda x: f"{x:,.{dec}f}"
+    side = "LONG" if c["dir"] == 1 else "SHORT"
+    return (f"{c['contract']} {c['tf']} {side} ({c['state']})\n"
+            f"Entry {f(c['entry'])}  Stop {f(c['stop'])}  Target {f(c['target'])}\n"
+            f"{c['r']:.1f}R  risk ${c['risk_micro']:,.0f}/{c['contract']} (${c['risk_full']:,.0f}/{c['full']})")
+
+
+def send_alerts(new, now, slot):
+    """One notification per scan that found NEW setups (already-logged boxes stay quiet)."""
+    topic = os.environ.get("NTFY_TOPIC", "").strip()
+    if not topic or not new:
+        return None
+    title = f"Zen futures: {len(new)} new setup{'s' if len(new) > 1 else ''} ({slot})"
+    body = "\n\n".join(alert_text(c) for c in new[:6])
+    try:
+        return ntfy_send(topic, title, body)
+    except Exception as e:
+        print("alert failed:", e)
+        return None
+
+
+def send_test_alert(now):
+    topic = os.environ.get("NTFY_TOPIC", "").strip()
+    if not topic:
+        print("NTFY_TOPIC secret is not set, so no alert was sent.")
+        return None
+    try:
+        st = ntfy_send(topic, "Zen futures: test alert",
+                       f"Alerts are working. Sent {now:%a %m/%d %I:%M %p} Central.\n"
+                       "You'll get one like this when a scan finds a new MES, MNQ or MGC setup.",
+                       tags="white_check_mark", priority="default")
+        print("Test alert sent, status", st)
+        return st
+    except Exception as e:
+        print("Test alert failed:", e)
+        return None
+
+
 # ---- scan -----------------------------------------------------------------------
 def setup_card(micro, full, mpv, fpv, tick, tf, df, sig):
     d = sig["dir"]
@@ -105,7 +229,9 @@ def setup_card(micro, full, mpv, fpv, tick, tf, df, sig):
                 risk_pts=risk, reward_pts=reward, r=reward / risk, risk_ticks=int(round(risk / tick)),
                 risk_micro=risk * mpv, risk_full=risk * fpv,
                 reward_micro=reward * mpv, reward_full=reward * fpv,
-                bar_time=df.index[-1].isoformat())
+                bar_time=df.index[-1].isoformat(),
+                chart=dict(chart_bars(df), span=box_span(df, float(sig["top"]), float(sig["bot"]),
+                                                          int(sig["age"]))))
 
 
 def scan_contract(spec, frames):
@@ -127,7 +253,8 @@ def scan_contract(spec, frames):
         if box:
             watches.append(dict(contract=micro, tf=tf, status=box["status"], top=box["top"],
                                 bot=box["bot"], mid=box["mid"], price=box["price"],
-                                bars=box["days"], to_roof=box["to_roof"], to_floor=box["to_floor"]))
+                                bars=box["days"], to_roof=box["to_roof"], to_floor=box["to_floor"],
+                                chart=dict(chart_bars(df), span=(box["days"] + 1, 1))))
     return setups, watches
 
 
@@ -146,12 +273,34 @@ def run_futures(now, slot):
         setups += s
         watches += w
     setups.sort(key=lambda c: (c["state"] != "retest", -c["r"]))
+    levels = {}
+    for spec in CONTRACTS:
+        try:
+            lv = key_levels(frames["15m"].get(spec[2]))
+            if lv:
+                levels[spec[0]] = lv
+        except Exception as e:
+            print(f"{spec[0]} levels failed: {e}")
     LAST_RUN.clear()
     LAST_RUN.update(time=now.isoformat(), slot=slot, setups=setups, watches=watches,
-                    contracts=[c[0] for c in CONTRACTS])
-    log_setups(setups, now, slot)
+                    levels=levels, contracts=[c[0] for c in CONTRACTS])
+    new = log_setups(setups, now, slot)
     print_futures(setups, watches, now, slot)
+    print_levels(levels)
+    st = send_alerts(new, now, slot)
+    if st:
+        print(f"\nPhone alert sent for {len(new)} new setup(s).")
     return setups
+
+
+def print_levels(levels):
+    if not levels:
+        return
+    print("\nKey levels (15-min bars, Central):")
+    for name, lv in levels.items():
+        dec = 1 if name == "MGC" else 2
+        parts = "  ".join(f"{l['name']} {l['value']:,.{dec}f}" for l in lv["levels"])
+        print(f"  {name} now {lv['price']:,.{dec}f} | {parts}")
 
 
 def print_futures(setups, watches, now, slot):
@@ -194,7 +343,7 @@ def read_log():
 
 def log_setups(setups, now, slot):
     log = read_log()
-    rows = []
+    rows, fresh = [], []
     for c in setups:
         recent = log[(log["contract"] == c["contract"]) & (log["tf"] == c["tf"])
                      & (log["dir"] == c["dir"])]
@@ -211,10 +360,12 @@ def log_setups(setups, now, slot):
                          dir=c["dir"], entry=c["entry"], stop=c["stop"], target=c["target"],
                          top=c["top"], bot=c["bot"], kind=c["kind"], state=c["state"],
                          price=c["price"], r=round(c["r"], 3), grade="open"))
+        fresh.append(c)
     if rows:
         new = pd.DataFrame(rows, columns=LOG_COLS)
         log = new if log.empty else pd.concat([log, new], ignore_index=True)
         log.to_csv(LOG_FILE, index=False)
+    return fresh
 
 
 # ---- review ---------------------------------------------------------------------

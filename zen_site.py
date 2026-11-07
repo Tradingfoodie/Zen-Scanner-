@@ -150,7 +150,8 @@ def update_futures(zf, now):
     d = load()
     r = zf.LAST_RUN
     d["futures"] = dict(time=now.isoformat(), slot=r.get("slot", ""),
-                        setups=r.get("setups", []), watches=r.get("watches", []))
+                        setups=r.get("setups", []), watches=r.get("watches", []),
+                        levels=r.get("levels", {}))
     try:
         desk = desk_signals(zf.z.yf)
         if desk:
@@ -304,6 +305,75 @@ def review_html(rv):
             f'<p class="note">To beat: defensive calls 67%, tech calls 18%.</p></div></div>')
 
 
+def candles_svg(ch, lines=(), box=None, w=320, h=150):
+    """Small candlestick chart. ch = {"bars": [[o,h,l,c],...], "span": (start, end)} with span
+    counted in bars from the right edge; lines = [(price, label, css color)]; box = (top, bot)."""
+    bars = (ch or {}).get("bars") or []
+    if len(bars) < 5:
+        return ""
+    n = len(bars)
+    vals = [v for b in bars for v in (b[1], b[2])] + [p for p, _, _ in lines]
+    if box:
+        vals += list(box)
+    lo, hi = min(vals), max(vals)
+    pad = (hi - lo) * 0.06 or 1
+    lo, hi = lo - pad, hi + pad
+    right = 74                                    # room for line labels
+    cw = (w - right) / n
+    y = lambda v: h - 4 - (v - lo) / (hi - lo) * (h - 8)
+    out = [f'<svg class="chart" viewBox="0 0 {w} {h}" preserveAspectRatio="none" role="img">']
+    if box:
+        a, b = ch.get("span") or (n, 0)
+        x0 = max(0, n - a) * cw
+        x1 = max(0, n - b) * cw
+        out.append(f'<rect x="{x0:.1f}" y="{y(box[0]):.1f}" width="{max(x1 - x0, 2):.1f}" '
+                   f'height="{max(y(box[1]) - y(box[0]), 1):.1f}" fill="rgba(34,211,238,.10)" '
+                   f'stroke="rgba(34,211,238,.45)" stroke-dasharray="3 3"/>')
+    for i, (o, hh, ll, c) in enumerate(bars):
+        x = i * cw + cw / 2
+        col = "var(--pos)" if c >= o else "var(--neg)"
+        top, bot = y(max(o, c)), y(min(o, c))
+        out.append(f'<line x1="{x:.1f}" x2="{x:.1f}" y1="{y(hh):.1f}" y2="{y(ll):.1f}" stroke="{col}" stroke-width="1"/>'
+                   f'<rect x="{x - cw * 0.32:.1f}" y="{top:.1f}" width="{cw * 0.64:.1f}" height="{max(bot - top, 0.8):.1f}" fill="{col}"/>')
+    for p, label, col in lines:
+        yy = y(p)
+        out.append(f'<line x1="0" x2="{w - right + 2}" y1="{yy:.1f}" y2="{yy:.1f}" stroke="{col}" stroke-width="1" stroke-dasharray="4 3"/>'
+                   f'<text x="{w - right + 5}" y="{yy + 3.5:.1f}" fill="{col}" font-size="10" font-family="Share Tech Mono,monospace">{esc(label)}</text>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+def levels_html(levels):
+    if not levels:
+        return ""
+    cards = []
+    for name, lv in levels.items():
+        dec = 1 if name == "MGC" else 2
+        f = lambda x: f"{x:,.{dec}f}"
+        px = lv["price"]
+        rows = sorted(lv["levels"], key=lambda l: -l["value"])
+        items, placed = [], False
+        for l in rows:
+            if not placed and l["value"] < px:
+                items.append(f'<li class="now"><span>▶ Price now</span><b>{f(px)}</b></li>')
+                placed = True
+            tone = "pos" if "high" in l["name"].lower() else "neg" if "low" in l["name"].lower() else ""
+            items.append(f'<li><span>{esc(l["name"])}</span><b class="{tone}">{f(l["value"])}</b>'
+                         f'<em>{round(l["value"] - px, dec) + 0.0:+,.{dec}f}</em></li>')
+        if not placed:
+            items.append(f'<li class="now"><span>▶ Price now</span><b>{f(px)}</b></li>')
+        near = []
+        if lv.get("above"):
+            near.append(f'{esc(lv["above"]["name"])} {f(lv["above"]["dist"])} pts above')
+        if lv.get("below"):
+            near.append(f'{esc(lv["below"]["name"])} {f(lv["below"]["dist"])} pts below')
+        cards.append(f'''<div class="card lv"><div class="b-head"><b>{esc(name)}</b><span class="sty">nearest: {" · ".join(near) or "—"}</span></div>
+          <ul class="lv-list">{"".join(items)}</ul></div>''')
+    return ('<h3 class="subh">Key levels</h3><div class="grid fut-grid">' + "".join(cards) + '</div>'
+            '<p class="note">Prior day = last full Globex day (5 PM–4 PM). NY = 8:30 AM–3:00 PM CT session. '
+            'Tonight = since 5:00 PM CT. Numbers on the right = distance from price.</p>')
+
+
 def futures_html(fu):
     if not fu:
         return '<p class="empty">Futures setups appear after the first Asia-session scan (Sun–Thu, about 5:30 PM and 9:00 PM CT).</p>'
@@ -320,6 +390,7 @@ def futures_html(fu):
           <table class="ft"><tr><td>Entry</td><td><b>{f(c["entry"])}</b></td></tr>
           <tr><td>Stop</td><td class="neg">{f(c["stop"])}</td></tr>
           <tr><td>Target</td><td class="pos">{f(c["target"])}</td></tr></table>
+          {candles_svg(c.get("chart"), [(c["target"], "TARGET", "var(--pos)"), (c["entry"], "ENTRY", "var(--accent)"), (c["stop"], "STOP", "var(--neg)")], (c["top"], c["bot"]))}
           <p><b class="score">{c["r"]:.1f}R</b> <span class="sty">target: {esc(c["kind"])}</span> {low_r}</p>
           <p class="note">Risk {c["risk_ticks"]} ticks · ${c["risk_micro"]:,.0f} per {esc(c["contract"])} · ${c["risk_full"]:,.0f} per {esc(c["full"])}</p>
           <p class="note">{"Price is at the broken edge now." if retest else f"Price ran {f(abs(c['price'] - c['entry']))} past the edge: wait for the punchback."} Now {f(c["price"])}.</p></div>''')
@@ -328,16 +399,21 @@ def futures_html(fu):
     watch = []
     for w in fu.get("watches", []):
         if w["status"] == "skip":
-            watch.append(f'<li><b>{esc(w["contract"])}</b> {esc(w["tf"])}: <span class="warn">skipped</span> <span class="note">{esc(w["note"])}</span></li>')
-        elif w["status"] in ("up", "down"):
-            up = w["status"] == "up"
-            watch.append(f'<li><b>{esc(w["contract"])}</b> {esc(w["tf"])}: <span class="{"pos" if up else "neg"}">breaking {"up" if up else "down"}</span> '
-                         f'of {w["bot"]:,.2f}–{w["top"]:,.2f} · now {w["price"]:,.2f}</li>')
-        else:
-            watch.append(f'<li><b>{esc(w["contract"])}</b> {esc(w["tf"])}: in a box {w["bot"]:,.2f}–{w["top"]:,.2f} '
-                         f'({w["bars"]} bars) · now {w["price"]:,.2f}</li>')
-    watch_html = f'<div class="card"><h3>Box watch</h3><ul class="list">{"".join(watch) or "<li class=note>No tight boxes right now.</li>"}</ul></div>'
-    return (f'<div class="grid fut-grid">{"".join(cards)}</div><div class="grid two">{watch_html}</div>'
+            watch.append(f'<div class="box-card"><div class="b-head"><b>{esc(w["contract"])} <span class="sty">{esc(w["tf"])}</span></b>'
+                         f'<span class="chip neu">skipped</span></div><p class="note">{esc(w["note"])}</p></div>')
+            continue
+        dec = 1 if w["contract"] == "MGC" else 2
+        up, dn = w["status"] == "up", w["status"] == "down"
+        tone = "pos" if up else "neg" if dn else ""
+        label = "Breaking up" if up else "Breaking down" if dn else "In a box"
+        chart = candles_svg(w.get("chart"), [(w["top"], f'{w["top"]:,.{dec}f}', "var(--pos)"),
+                                             (w["bot"], f'{w["bot"]:,.{dec}f}', "var(--neg)")], (w["top"], w["bot"]))
+        watch.append(f'''<div class="box-card {tone}"><div class="b-head"><b>{esc(w["contract"])} <span class="sty">{esc(w["tf"])}</span></b>
+          <span class="chip {tone or "neu"}">{label}</span></div>{chart}
+          <p class="note">Box {w["bot"]:,.{dec}f}–{w["top"]:,.{dec}f} · {w["bars"]} bars · now {w["price"]:,.{dec}f}</p></div>''')
+    watch_html = ('<h3 class="subh">Box watch</h3><div class="grid fut-grid">' + ("".join(watch) or
+                  '<p class="empty">No tight boxes in MES, MNQ or MGC right now.</p>') + '</div>')
+    return (f'{levels_html(fu.get("levels"))}<h3 class="subh">Setups</h3><div class="grid fut-grid">{"".join(cards)}</div>{watch_html}'
             f'<p class="note">Scan {esc(fmt_time(fu.get("time", "")))} ({esc(fu.get("slot", ""))}) · Entry = broken box edge, '
             f'stop = box 50%, target = next box. 15-min and hourly bars, ~10–15 min delayed.</p>')
 
@@ -428,7 +504,7 @@ tr:hover td{background:var(--panel2)}
 .note{font-size:12px;color:var(--dim);margin-top:6px}
 .empty{color:var(--dim);font-size:13px;padding:14px;border:1px dashed var(--line);border-radius:10px}
 footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font:11px "Share Tech Mono",monospace;color:var(--dim);letter-spacing:.06em;line-height:1.8}
-.fut-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.ft{min-width:0;width:100%;margin:8px 0;font-size:14px}.ft td{padding:3px 0;border:0}.ft td:last-child{text-align:right}
+.fut-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.subh{font-size:12px;color:var(--dim);margin:18px 0 10px}.chart{width:100%;height:150px;margin:6px 0;display:block}.lv-list{list-style:none;margin-top:6px;font:13px "Share Tech Mono",monospace}.lv-list li{display:grid;grid-template-columns:1fr auto 64px;gap:8px;padding:5px 0;border-bottom:1px solid rgba(28,40,54,.6)}.lv-list em{font-style:normal;color:var(--dim);text-align:right;font-size:11px}.lv-list li.now{color:var(--accent);grid-template-columns:1fr auto;border-bottom:1px solid var(--accent)}.ft{min-width:0;width:100%;margin:8px 0;font-size:14px}.ft td{padding:3px 0;border:0}.ft td:last-child{text-align:right}
 @media(max-width:520px){.flow-row{grid-template-columns:92px 1fr 52px}}
 """
 
