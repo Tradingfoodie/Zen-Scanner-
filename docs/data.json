@@ -1,0 +1,82 @@
+{
+ "review": {
+  "time": "2026-11-06T23:36:18.948652-06:00",
+  "cards": [
+   {
+    "style": "short",
+    "wins": 27,
+    "losses": 48,
+    "n": 76,
+    "rate": 0.35526315789473684,
+    "dollars": 260.8697144881539,
+    "open": 3
+   },
+   {
+    "style": "swing",
+    "wins": 31,
+    "losses": 66,
+    "n": 97,
+    "rate": 0.31958762886597936,
+    "dollars": -200.0,
+    "open": 18
+   }
+  ],
+  "top": [
+   {
+    "ticker": "TSLA",
+    "side": "call",
+    "strike": 387.5,
+    "expiry": "2026-10-26",
+    "peak": 19.78721066738697,
+    "now": 7.765947057845745,
+    "style": "short"
+   },
+   {
+    "ticker": "AAPL",
+    "side": "call",
+    "strike": 347.5,
+    "expiry": "2026-11-09",
+    "peak": 14.624999999999998,
+    "now": 0.45535714285714257,
+    "style": "short"
+   },
+   {
+    "ticker": "LULU",
+    "side": "call",
+    "strike": 103.0,
+    "expiry": "2026-10-30",
+    "peak": 7.93877769003109,
+    "now": 3.3265284324178888,
+    "style": "short"
+   },
+   {
+    "ticker": "MCD",
+    "side": "call",
+    "strike": 275.0,
+    "expiry": "2026-11-27",
+    "peak": 6.661538490882286,
+    "now": 4.461538461538461,
+    "style": "swing"
+   },
+   {
+    "ticker": "XOM",
+    "side": "put",
+    "strike": 170.0,
+    "expiry": "2026-11-20",
+    "peak": 5.054421509204268,
+    "now": 3.9149659863945576,
+    "style": "swing"
+   },
+   {
+    "ticker": "CCL",
+    "side": "call",
+    "strike": 27.0,
+    "expiry": "2026-11-13",
+    "peak": 4.193181471391157,
+    "now": 2.130681818181818,
+    "style": "swing"
+   }
+  ],
+  "sector": []
+ }
+}

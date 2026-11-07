@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Zen Quant Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b10;--panel:#0d131b;--panel2:#111a24;--line:#1c2836;--text:#d3e0ec;--dim:#6f8396;
+--accent:#22d3ee;--pos:#2ee59d;--neg:#ff4d6d;--warn:#ffcc33;--violet:#a78bfa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 "DM Sans",system-ui,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;
+background-image:linear-gradient(rgba(34,211,238,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.035) 1px,transparent 1px);background-size:44px 44px}
+main{position:relative;max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+.top{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-end;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:22px}
+h1{font:900 clamp(20px,5vw,28px)/1.1 Orbitron,monospace;letter-spacing:.14em;color:var(--accent);text-shadow:0 0 22px rgba(34,211,238,.35)}
+.top p{font:12px "Share Tech Mono",monospace;color:var(--dim);letter-spacing:.08em;margin-top:6px}
+.live{display:flex;align-items:center;gap:8px;font:12px "Share Tech Mono",monospace;color:var(--dim)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--pos);box-shadow:0 0 10px var(--pos);animation:p 2s infinite}
+@keyframes p{50%{opacity:.35}}
+section{margin-top:30px}
+h2{font:700 12px Orbitron,monospace;letter-spacing:.22em;color:var(--dim);margin-bottom:12px;display:flex;gap:10px;align-items:center}
+h2:after{content:"";flex:1;height:1px;background:var(--line)}
+h3{font:700 15px Orbitron,monospace;letter-spacing:.1em}
+.grid{display:grid;gap:12px}
+.desk-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.box-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.stat-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.two{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));margin-top:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.desk:before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.desk header{display:flex;justify-content:space-between;gap:8px}
+.sub{font:11px "Share Tech Mono",monospace;color:var(--dim);letter-spacing:.06em}
+.px{text-align:right;font-family:"Share Tech Mono",monospace}.px b{display:block;font-size:17px}.px span{font-size:12px}
+.spark{width:100%;height:40px;margin:10px 0 8px}
+.meter{display:grid;grid-template-columns:1fr auto;gap:3px 8px;font:11px "Share Tech Mono",monospace;margin-top:8px}.meter .m-track{grid-column:1/-1}
+.m-label{color:var(--dim)}.m-val{text-align:right}
+.m-track{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.m-fill{display:block;height:100%;border-radius:3px;background:var(--dim)}
+.m-fill.pos{background:var(--pos)}.m-fill.neg{background:var(--neg)}.m-fill.warn{background:var(--warn)}.m-fill.neu{background:#3b5168}
+.trend{font:11px "Share Tech Mono",monospace;color:var(--dim);margin-top:10px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.warn{color:var(--warn)}
+.flow-row{display:grid;grid-template-columns:110px 1fr 60px;gap:10px;align-items:center;margin:7px 0;font-size:13px}
+.f-track{position:relative;height:10px;background:var(--panel2);border-radius:5px}
+.f-track:before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line)}
+.f-bar{position:absolute;top:0;bottom:0;border-radius:5px}.f-bar.right{left:50%}.f-bar.left{right:50%}
+.f-bar.pos{background:linear-gradient(90deg,rgba(46,229,157,.4),var(--pos))}.f-bar.neg{background:linear-gradient(270deg,rgba(255,77,109,.4),var(--neg))}
+.f-val{text-align:right;font-family:"Share Tech Mono",monospace;font-size:12px}
+.table-wrap{padding:0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font:13px "Share Tech Mono",monospace;min-width:560px}
+th{text-align:left;font-weight:400;color:var(--dim);font-size:11px;letter-spacing:.08em;padding:12px 14px;border-bottom:1px solid var(--line)}
+td{padding:11px 14px;border-bottom:1px solid rgba(28,40,54,.6);white-space:nowrap}
+tr:hover td{background:var(--panel2)}
+.score{display:inline-block;min-width:30px;font-weight:700;color:var(--accent)}.sty{color:var(--dim);font-size:11px;margin-left:4px}
+.tag,.chip{display:inline-block;font:11px "Share Tech Mono",monospace;padding:1px 7px;border-radius:999px;border:1px solid var(--line);margin-right:4px}
+.t-B{color:var(--accent);border-color:rgba(34,211,238,.4)}.t-E{color:var(--violet);border-color:rgba(167,139,250,.4)}
+.t-F{color:var(--warn);border-color:rgba(255,204,51,.4)}.t-warn{color:var(--neg);border-color:rgba(255,77,109,.4)}
+.chip.pos{border-color:rgba(46,229,157,.45)}.chip.neg{border-color:rgba(255,77,109,.45)}.chip.neu{color:var(--dim)}
+.table-wrap .note{padding:10px 14px}
+.box-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13px}
+.box-card.pos{border-color:rgba(46,229,157,.35)}.box-card.neg{border-color:rgba(255,77,109,.35)}
+.b-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.range{position:relative;height:8px;margin:14px 2px 6px;border-radius:4px;background:linear-gradient(90deg,rgba(255,77,109,.35),#24384b,rgba(46,229,157,.35))}
+.r-mid{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--dim)}
+.r-dot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.r-lab{display:flex;justify-content:space-between;font:11px "Share Tech Mono",monospace;color:var(--dim)}
+.stat .big{display:block;font:900 34px Orbitron,monospace;margin:6px 0}
+.list{list-style:none;margin-top:10px;font-size:13px}.list li{padding:6px 0;border-bottom:1px solid rgba(28,40,54,.6)}
+.note{font-size:12px;color:var(--dim);margin-top:6px}
+.empty{color:var(--dim);font-size:13px;padding:14px;border:1px dashed var(--line);border-radius:10px}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font:11px "Share Tech Mono",monospace;color:var(--dim);letter-spacing:.06em;line-height:1.8}
+@media(max-width:520px){.flow-row{grid-template-columns:92px 1fr 52px}}
+</style></head><body><main>
+<div class="top"><div><h1>ZEN QUANT DESK</h1>
+<p>REAL DATA · BOX SCANNER · SECTOR FLOW · FUTURES DESK</p></div>
+<div class="live"><span class="dot"></span>Last scan —</div></div>
+
+<section><h2>MARKET DESK</h2><p class="empty">Market data will appear after the next scan.</p>
+<p class="note">Hourly bars, ~15 min delayed. The April dashboard's three signals, now on real prices. Untested: context, not trade calls.</p></section>
+
+<section><h2>SECTOR FLOW</h2><p class="empty">Sector flow appears after the next scan.</p></section>
+
+<section><h2>TODAY'S PICKS</h2><p class="empty">No picks passed the filters in the last scan.</p></section>
+
+<section><h2>BOX WATCH</h2><p class="empty">No boxes to watch in the last scan.</p></section>
+
+<section><h2>SCORECARD</h2><div class="grid stat-grid"><div class="card stat"><p class="sub">SHORT list</p>
+          <b class="big pos">36%</b><p>win rate · 27W 48L · 3 open</p>
+          <p class="pos">+$261 at $100/trade</p>
+          <p class="note">Break-even is about 33%.</p></div><div class="card stat"><p class="sub">SWING list</p>
+          <b class="big neg">32%</b><p>win rate · 31W 66L · 18 open</p>
+          <p class="neg">−$200 at $100/trade</p>
+          <p class="note">Break-even is about 33%.</p></div></div><div class="grid two"><div class="card"><h3>Top runners</h3><ul class="list"><li><b>TSLA</b> C 387.5 <span class="pos">best +1979%</span> <span class="note">now +777%</span></li><li><b>AAPL</b> C 347.5 <span class="pos">best +1462%</span> <span class="note">now +46%</span></li><li><b>LULU</b> C 103 <span class="pos">best +794%</span> <span class="note">now +333%</span></li><li><b>MCD</b> C 275 <span class="pos">best +666%</span> <span class="note">now +446%</span></li><li><b>XOM</b> P 170 <span class="pos">best +505%</span> <span class="note">now +391%</span></li><li><b>CCL</b> C 27 <span class="pos">best +419%</span> <span class="note">now +213%</span></li></ul></div><div class="card"><h3>Sector test (11/9–11/20)</h3><ul class="list"><li class="note">Sector test results start after the first tagged picks are graded (from 11/9).</li></ul><p class="note">To beat: defensive calls 67%, tech calls 18%.</p></div></div>
+<p class="note">Latest review: Fri Nov 6 · 11:36 PM CT · rules: sell at +100%, cut at −50%.</p></section>
+
+<footer>RESEARCH TOOL · NOT FINANCIAL ADVICE · DATA: YAHOO FINANCE<br>
+Page built Fri Nov 6, 11:37 PM CT</footer>
+</main></body></html>
