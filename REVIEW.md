@@ -1,6 +1,6 @@
 # Zen Review
 
-Fri 11/06 11:36 PM Central
+Sat 11/07 09:24 AM Central
 
 ```
 (skipped 8 picks from the old copy, 11/6 9:03am)
@@ -1281,4 +1281,10 @@ SHORT HOLD-TO-EXPIRY (70 expired)
     has no edge yet)
    box retests win  12% (24)
    all others win   13% (46)
+```
+
+## Futures
+
+```
+No futures setups logged yet.
 ```
