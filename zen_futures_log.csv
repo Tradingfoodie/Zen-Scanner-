@@ -1,0 +1,2 @@
+scan_time,slot,contract,tf,dir,entry,stop,target,top,bot,kind,state,price,r,grade,result_r,fill_time,exit_time
+2026-11-08T20:46:44.812670-06:00,asia mid,MGC,1h,1,4087.2,4068.9,4123.7,4087.199951171875,4050.699951171875,measured,extended,4134.5,1.995,open,,,
