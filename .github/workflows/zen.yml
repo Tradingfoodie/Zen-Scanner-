@@ -4,10 +4,13 @@ on:
     - cron: "30 16 * * 1-5"   # 11:30 Central in summer (stock scan)
     - cron: "30 17 * * 1-5"   # 11:30 Central in winter
     - cron: "0 15 * * 6"      # Saturday review
-    - cron: "30 22 * * 0-4"   # 5:30 PM Central in summer, Sun-Thu (futures, Asia open)
-    - cron: "30 23 * * 0-4"   # 5:30 PM Central in winter
-    - cron: "0 2 * * 1-5"     # 9:00 PM Central in summer, Sun-Thu evenings (futures, Asia mid)
-    - cron: "0 3 * * 1-5"     # 9:00 PM Central in winter
+    # Futures, Sun-Thu evenings. GitHub drops or delays runs at busy times (on the hour),
+    # so each scan is scheduled at odd minutes with a backup 30 min later; whichever runs
+    # first does the scan and the rest exit (run.py checks the time window and if it's done).
+    - cron: "27 22,23 * * 0-4"   # ~5:27 PM Central (summer: 22:27 UTC, winter: 23:27 UTC)
+    - cron: "57 22,23 * * 0-4"   # backup ~5:57 PM Central
+    - cron: "7 2,3 * * 1-5"      # ~9:07 PM Central (summer: 02:07 UTC, winter: 03:07 UTC)
+    - cron: "37 2,3 * * 1-5"     # backup ~9:37 PM Central
   workflow_dispatch:
     inputs:
       mode:
