@@ -21,8 +21,8 @@ stamp = now.strftime("%a %m/%d %I:%M %p Central")
 
 # Asia-session futures scans, Sunday-Thursday evenings (Central). Each schedule has a
 # summer and a winter copy in zen.yml; only the copy that lands inside a window runs.
-FUT_SLOTS = [("asia open", dt.time(17, 0), dt.time(18, 15)),
-             ("asia mid", dt.time(20, 30), dt.time(21, 45))]
+FUT_SLOTS = [("asia open", dt.time(17, 0), dt.time(19, 0)),
+             ("asia mid", dt.time(20, 45), dt.time(23, 0))]
 ASIA_DAYS = (6, 0, 1, 2, 3)   # Sun, Mon, Tue, Wed, Thu
 
 
