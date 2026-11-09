@@ -151,7 +151,7 @@ def update_futures(zf, now):
     r = zf.LAST_RUN
     d["futures"] = dict(time=now.isoformat(), slot=r.get("slot", ""),
                         setups=r.get("setups", []), watches=r.get("watches", []),
-                        levels=r.get("levels", {}))
+                        levels=r.get("levels", {}), missing=r.get("missing", []))
     try:
         desk = desk_signals(zf.z.yf)
         if desk:
@@ -371,7 +371,7 @@ def levels_html(levels):
           <ul class="lv-list">{"".join(items)}</ul></div>''')
     return ('<h3 class="subh">Key levels</h3><div class="grid fut-grid">' + "".join(cards) + '</div>'
             '<p class="note">Prior day = last full Globex day (5 PM–4 PM). NY = 8:30 AM–3:00 PM CT session. '
-            'Tonight = since 5:00 PM CT. Numbers on the right = distance from price.</p>')
+            'Overnight = since the 5:00 PM CT reopen (on weekends, Thursday night into Friday). Numbers on the right = distance from price.</p>')
 
 
 def futures_html(fu):
@@ -386,14 +386,14 @@ def futures_html(fu):
         f = lambda x: f"{x:,.{dec}f}"
         low_r = '<span class="tag t-warn">R under 1</span>' if c["r"] < 1 else ""
         cards.append(f'''<div class="box-card {tone}"><div class="b-head"><b>{esc(c["contract"])} <span class="sty">{esc(c["tf"])}</span></b>
-          <span class="chip {tone}">{"LONG" if long_ else "SHORT"} · {"retest" if retest else "extended"}</span></div>
+          <span class="chip {tone}">{"READY" if retest else "WATCH"} · {"LONG" if long_ else "SHORT"}</span></div>
           <table class="ft"><tr><td>Entry</td><td><b>{f(c["entry"])}</b></td></tr>
           <tr><td>Stop</td><td class="neg">{f(c["stop"])}</td></tr>
           <tr><td>Target</td><td class="pos">{f(c["target"])}</td></tr></table>
           {candles_svg(c.get("chart"), [(c["target"], "TARGET", "var(--pos)"), (c["entry"], "ENTRY", "var(--accent)"), (c["stop"], "STOP", "var(--neg)")], (c["top"], c["bot"]))}
           <p><b class="score">{c["r"]:.1f}R</b> <span class="sty">target: {esc(c["kind"])}</span> {low_r}</p>
           <p class="note">Risk {c["risk_ticks"]} ticks · ${c["risk_micro"]:,.0f} per {esc(c["contract"])} · ${c["risk_full"]:,.0f} per {esc(c["full"])}</p>
-          <p class="note">{"Price is at the broken edge now." if retest else f"Price ran {f(abs(c['price'] - c['entry']))} past the edge: wait for the punchback."} Now {f(c["price"])}.</p></div>''')
+          <p class="note">{"Price is at the entry now." if retest else f"Price ran {f(abs(c['price'] - c['entry']))} past the edge: wait for a pullback to {f(c['entry'])}."} Now {f(c["price"])}.</p></div>''')
     if not cards:
         cards.append('<p class="empty">No box breakouts retesting in MES, MNQ or MGC right now.</p>')
     watch = []
@@ -413,7 +413,10 @@ def futures_html(fu):
           <p class="note">Box {w["bot"]:,.{dec}f}–{w["top"]:,.{dec}f} · {w["bars"]} bars · now {w["price"]:,.{dec}f}</p></div>''')
     watch_html = ('<h3 class="subh">Box watch</h3><div class="grid fut-grid">' + ("".join(watch) or
                   '<p class="empty">No tight boxes in MES, MNQ or MGC right now.</p>') + '</div>')
-    return (f'{levels_html(fu.get("levels"))}<h3 class="subh">Setups</h3><div class="grid fut-grid">{"".join(cards)}</div>{watch_html}'
+    miss = fu.get("missing") or []
+    miss_html = (f'<p class="warn">No data from Yahoo this run for {esc(", ".join(miss))}. '
+                 'It will be retried at the next scan.</p>') if miss else ""
+    return (f'{miss_html}{levels_html(fu.get("levels"))}<h3 class="subh">Setups</h3><div class="grid fut-grid">{"".join(cards)}</div>{watch_html}'
             f'<p class="note">Scan {esc(fmt_time(fu.get("time", "")))} ({esc(fu.get("slot", ""))}) · Entry = broken box edge, '
             f'stop = box 50%, target = next box. 15-min and hourly bars, ~10–15 min delayed.</p>')
 
