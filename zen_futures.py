@@ -20,6 +20,7 @@ import datetime as dt
 import json
 import math
 import os
+import time
 import urllib.request
 from zoneinfo import ZoneInfo
 
@@ -59,20 +60,64 @@ def to_ct(df):
     return df
 
 
-def download(interval, period):
-    """{yahoo symbol: OHLC DataFrame in Central time} for all contracts."""
+MISSING = {}   # {interval: [contracts Yahoo didn't deliver]} for the latest run
+
+
+def pick(data, sym):
+    """OHLC for one symbol out of a yfinance result, whatever its column layout."""
+    cols = data.columns
+    if isinstance(cols, pd.MultiIndex):
+        for lvl in range(cols.nlevels):
+            if sym in cols.get_level_values(lvl):
+                data = data.xs(sym, axis=1, level=lvl)
+                break
+    return data[["Open", "High", "Low", "Close"]].dropna()
+
+
+def download(interval, period, tries=3):
+    """{yahoo symbol: OHLC DataFrame in Central time} for all contracts. Yahoo sometimes
+    leaves one symbol empty in a batch, so any missing symbol is retried on its own."""
     syms = [c[2] for c in CONTRACTS]
-    data = z.yf.download(syms, period=period, interval=interval, group_by="ticker",
-                         auto_adjust=False, progress=False, threads=True)
     out = {}
-    for s in syms:
-        try:
-            df = data[s][["Open", "High", "Low", "Close"]].dropna()
-        except Exception:
-            continue
-        if len(df) >= 80:
-            out[s] = to_ct(df)
+    try:
+        data = z.yf.download(syms, period=period, interval=interval, group_by="ticker",
+                             auto_adjust=False, progress=False, threads=True)
+    except Exception:
+        data = None
+    for attempt in range(tries):
+        for s in syms:
+            if s in out:
+                continue
+            try:
+                d = data if attempt == 0 and data is not None else z.yf.download(
+                    s, period=period, interval=interval, group_by="ticker",
+                    auto_adjust=False, progress=False, threads=False)
+                df = pick(d, s)
+            except Exception:
+                continue
+            if len(df) >= 80:
+                out[s] = clean_spikes(to_ct(df))
+        if len(out) == len(syms):
+            break
+        time.sleep(3)
+    names = {c[2]: c[0] for c in CONTRACTS}
+    MISSING[interval] = [names[s] for s in syms if s not in out]
     return out
+
+
+def clean_spikes(df, k=10.0):
+    """Yahoo's continuous futures data has the odd bad print: one bar with a wick hundreds of
+    points away. A wick longer than k x the typical bar range (median of the last 50 bars) is
+    cut back to the bar's body so it can't become a box edge or a key level."""
+    df = df.copy()
+    body_hi = df[["Open", "Close"]].max(axis=1)
+    body_lo = df[["Open", "Close"]].min(axis=1)
+    typical = (df["High"] - df["Low"]).rolling(50, min_periods=10).median().bfill()
+    up_bad = (df["High"] - body_hi) > k * typical
+    dn_bad = (body_lo - df["Low"]) > k * typical
+    df.loc[up_bad, "High"] = body_hi[up_bad]
+    df.loc[dn_bad, "Low"] = body_lo[dn_bad]
+    return df
 
 
 def atr_series(df):
@@ -149,7 +194,7 @@ def key_levels(df):
                ("NY close", float(ny["Close"].iloc[-1]))]
     tonight = df[(sid == cur) & ~rth_mask & ((tm >= dt.time(17, 0)) | (tm < RTH[0]))]
     if len(tonight):
-        lv += [("Tonight high", float(tonight["High"].max())), ("Tonight low", float(tonight["Low"].min()))]
+        lv += [("Overnight high", float(tonight["High"].max())), ("Overnight low", float(tonight["Low"].min()))]
     a = float(atr_series(df).iloc[-1])
     above = [(n, v) for n, v in lv if v > px]
     below = [(n, v) for n, v in lv if v < px]
@@ -176,7 +221,12 @@ def alert_text(c):
     dec = 1 if c["contract"] == "MGC" else 2
     f = lambda x: f"{x:,.{dec}f}"
     side = "LONG" if c["dir"] == 1 else "SHORT"
-    return (f"{c['contract']} {c['tf']} {side} ({c['state']})\n"
+    if c["state"] == "retest":
+        head = f"READY: {c['contract']} {c['tf']} {side}, price is at the entry"
+    else:
+        head = (f"WATCH: {c['contract']} {c['tf']} {side}, wait for a pullback to {f(c['entry'])} "
+                f"(now {f(c['price'])})")
+    return (f"{head}\n"
             f"Entry {f(c['entry'])}  Stop {f(c['stop'])}  Target {f(c['target'])}\n"
             f"{c['r']:.1f}R  risk ${c['risk_micro']:,.0f}/{c['contract']} (${c['risk_full']:,.0f}/{c['full']})")
 
@@ -186,8 +236,11 @@ def send_alerts(new, now, slot):
     topic = os.environ.get("NTFY_TOPIC", "").strip()
     if not topic or not new:
         return None
-    title = f"Zen futures: {len(new)} new setup{'s' if len(new) > 1 else ''} ({slot})"
-    body = "\n\n".join(alert_text(c) for c in new[:6])
+    ready = [c for c in new if c["state"] == "retest"]
+    watch = [c for c in new if c["state"] != "retest"]
+    parts = ([f"{len(ready)} READY"] if ready else []) + ([f"{len(watch)} WATCH"] if watch else [])
+    title = f"Zen futures: {' + '.join(parts)} ({slot})"
+    body = "\n\n".join(alert_text(c) for c in (ready + watch)[:6])
     try:
         return ntfy_send(topic, title, body)
     except Exception as e:
@@ -281,12 +334,16 @@ def run_futures(now, slot):
                 levels[spec[0]] = lv
         except Exception as e:
             print(f"{spec[0]} levels failed: {e}")
+    missing = sorted({m for v in MISSING.values() for m in v})
     LAST_RUN.clear()
     LAST_RUN.update(time=now.isoformat(), slot=slot, setups=setups, watches=watches,
-                    levels=levels, contracts=[c[0] for c in CONTRACTS])
+                    levels=levels, missing=missing, contracts=[c[0] for c in CONTRACTS])
     new = log_setups(setups, now, slot)
     print_futures(setups, watches, now, slot)
     print_levels(levels)
+    for iv, m in MISSING.items():
+        if m:
+            print(f"No {iv} data from Yahoo this run for: {', '.join(m)} (retried 3 times)")
     st = send_alerts(new, now, slot)
     if st:
         print(f"\nPhone alert sent for {len(new)} new setup(s).")
