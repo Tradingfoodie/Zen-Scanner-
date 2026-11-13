@@ -129,6 +129,13 @@ def update_review(z, now):
         w, l, n, dollars = z.rule_stats(dec, "grade", z.CUT_AT)
         cards.append(dict(style=style, wins=w, losses=l, n=n, rate=w / n, dollars=dollars,
                           open=int((g["grade"] == "open").sum())))
+    lot = df[df["style"] == "lotto"]
+    lot = lot[lot["expired"] | (lot["peak_ret"] >= 1)]
+    if len(lot):
+        dbl = lot["peak_ret"] >= 1
+        res = float((dbl * 1.0 + (~dbl) * lot["final_ret"].clip(lower=-1)).sum()) * 50
+        cards.append(dict(style="lottery", wins=int(dbl.sum()), losses=int((~dbl).sum()),
+                          n=len(lot), rate=float(dbl.mean()), dollars=res * 2, open=0, lotto=True))
     top = []
     for _, r in df.sort_values("peak_ret", ascending=False).head(6).iterrows():
         if r["peak_ret"] <= 0:
@@ -255,7 +262,7 @@ def picks_html(picks):
         rows.append(f'''<tr><td><b>{esc(p["ticker"])}</b></td>
           <td class="{"pos" if side == "C" else "neg"}">{side} {p["strike"]:g}</td>
           <td>{esc(p["expiry"][5:].replace("-", "/"))}</td><td>${p["cost"]:,.0f}</td>
-          <td><span class="score">{p["score"]:.0f}</span><span class="sty">{"short" if p["style"] == "short" else "swing"}</span></td>
+          <td><span class="score">{p["score"]:.0f}</span><span class="sty">{ {"short": "short", "lotto": "lottery"}.get(p["style"], "swing") }</span></td>
           <td>{tags}{flow}</td></tr>''')
     return ('<div class="card table-wrap"><table><thead><tr><th>Ticker</th><th>Contract</th><th>Exp</th>'
             '<th>Cost</th><th>Score</th><th>Tags</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table>"
@@ -288,11 +295,12 @@ def review_html(rv):
         return '<p class="empty">The scorecard updates after the Saturday review.</p>'
     cards = []
     for c in rv.get("cards", []):
-        good = c["rate"] >= 0.33
+        lotto = c.get("lotto")
+        good = c["rate"] >= (0.5 if lotto else 0.33)
         cards.append(f'''<div class="card stat"><p class="sub">{c["style"].upper()} list</p>
-          <b class="big {"pos" if good else "neg"}">{c["rate"]:.0%}</b><p>win rate · {c["wins"]}W {c["losses"]}L · {c["open"]} open</p>
+          <b class="big {"pos" if good else "neg"}">{c["rate"]:.0%}</b><p>{"doubled" if lotto else "win rate"} · {c["wins"]}W {c["losses"]}L · {c["open"]} open</p>
           <p class="{"pos" if c["dollars"] >= 0 else "neg"}">{"+" if c["dollars"] >= 0 else "−"}${abs(c["dollars"]):,.0f} at $100/trade</p>
-          <p class="note">Break-even is about 33%.</p></div>''')
+          <p class="note">Break-even is about {"50% (misses go to zero)" if lotto else "33%"}.</p></div>''')
     top = "".join(f'<li><b>{esc(t["ticker"])}</b> {"C" if t["side"] == "call" else "P"} {t["strike"]:g} '
                   f'<span class="pos">best {t["peak"]:+.0%}</span> <span class="note">now {t["now"]:+.0%}</span></li>'
                   for t in rv.get("top", []))

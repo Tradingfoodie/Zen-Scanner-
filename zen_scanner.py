@@ -87,12 +87,24 @@ STYLES = {
         flow_full=2.0,
         payoff_full=3.0,
     ),
+    # LOTTERY LIST (test from 11/16): cheap contracts 1-7 days out, graded on whether
+    # they DOUBLE at any point (sell into the pop), not on where they close.
+    "lotto": dict(
+        label="LOTTERY", top=5,
+        min_dte=1, max_dte=7,
+        targets=None,
+        strike_band=0.04,
+        max_premium=0.50,        # $50 per contract cap
+        min_option_volume=100,
+        flow_full=2.0,
+        payoff_full=3.0,
+    ),
 }
 MAX_SPREAD_PCT = 0.20  # skip contracts with (ask - bid) / mid above 20%
 REQUIRE_BOX = False    # True = only list/log picks with a clean box breakout/retest (B tag)
 SKIP_WARNINGS = True   # never list picks carrying a WARNING (! tag)
 BREAK_MARGIN_ATR = 0.15  # Box Watch: price must clear the edge by this many ATRs to count as breaking
-SCANNER_VERSION = "v29"  # written to the log so the review can tell versions apart
+SCANNER_VERSION = "v30"  # written to the log so the review can tell versions apart
 
 WEIGHTS = {  # max points per signal; total = 100
     "unusual_flow": 25,   # near-the-money volume vs open interest
@@ -545,11 +557,11 @@ def print_summary(picks, watches, today, top=8):
     print("#  TICKER  STRIKE   EXP   COST SC")
     for i, (_, r) in enumerate(best.iterrows(), 1):
         side = "C" if r["side"] == "call" else "P"
-        sty = "s" if r["style"] == "short" else "w"
+        sty = {"short": "s", "lotto": "L"}.get(r["style"], "w")
         cost = f"${r['mid'] * 100:,.0f}".rjust(5)
         print(f"{i:<2} {r['ticker']:<5} {side} {r['strike']:<6g} {pd.Timestamp(r['expiry']):%m/%d} "
               f"{cost} {r['score']:>2.0f}{sty} {pick_tags(r)}")
-    print("s=short w=swing | B=box E=earnings")
+    print("s=short w=swing L=lottery | B=box E=earnings")
     print("F=strong flow | !=warning, skip")
     breaking = [w for w in watches if w.get("status") in ("up", "down")]
     if breaking:
@@ -633,7 +645,7 @@ LAST_SCAN = {}     # structured results of the latest scan (used by the website)
 LAST_REVIEW = None  # graded picks from the latest review (used by the website)
 
 
-def run_scan(tickers, today, styles=("swing", "short")):
+def run_scan(tickers, today, styles=("swing", "short", "lotto")):
     if today.weekday() >= 5:
         print("Market is closed on weekends, so no scan was run")
         print("or logged. Run the review cell instead.")
@@ -860,6 +872,32 @@ def print_sector_test(df):
     print("   tech calls 18%. Under ~20 picks a group = too early.")
 
 
+def print_lottery(df):
+    """Lottery list: did the cheap contract DOUBLE at any point before expiry?
+    Graded as 'sell the whole thing at +100% if it gets there, else ride to expiry'."""
+    g = df[df["style"] == "lotto"]
+    if g.empty:
+        return
+    done = g[g["expired"] | (g["peak_ret"] >= 1)]
+    print("\n===== LOTTERY LIST (since 11/16) =====")
+    print("cheap, 1-7 days out | sell at +100%\n")
+    for _, r in g.iterrows():
+        hit = "DOUBLED" if r["peak_ret"] >= 1 else ("expired" if r["expired"] else "open")
+        print(f"{r['ticker']} {r['side'].upper()} {r['strike']:g}  exp {r['expiry']:%m/%d}"
+              f" | paid ${r['entry'] * 100:,.0f} | best {r['peak_ret']:+.0%} | {hit}")
+    if len(done):
+        doubled = done["peak_ret"] >= 1
+        res = doubled * 1.0 + (~doubled) * done["final_ret"].clip(lower=-1)
+        print(f"\n   doubled at some point: {doubled.mean():.0%} ({int(doubled.sum())} of {len(done)})")
+        print("   (break-even is about 50% if the misses go to zero)")
+        print(f"   if $50 each, sell at +100%: {money(float(res.sum()) * 50)}")
+        if "with_sector" in done.columns:
+            for lab in ("with", "against"):
+                part = done[done["with_sector"].fillna("") == lab]
+                if len(part):
+                    print(f"   {lab} sector flow: doubled {(part['peak_ret'] >= 1).mean():.0%} ({len(part)})")
+
+
 def money(x):
     return f"{'+' if x >= 0 else '-'}${abs(x):,.0f}"
 
@@ -941,6 +979,7 @@ def run_review(today):
     print("expired: value at expiration")
     print_top_runners(df)
     print_sector_test(df)
+    print_lottery(df)
     for style in ("swing", "short"):
         g = df[df["style"] == style]
         if g.empty:
