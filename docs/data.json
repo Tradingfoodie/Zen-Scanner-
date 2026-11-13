@@ -1,24 +1,24 @@
 {
  "review": {
-  "time": "2026-11-07T09:24:08.067579-06:00",
+  "time": "2026-11-13T16:37:37.476390-06:00",
   "cards": [
    {
     "style": "short",
-    "wins": 27,
-    "losses": 48,
-    "n": 76,
-    "rate": 0.35526315789473684,
-    "dollars": 260.8697144881539,
-    "open": 3
+    "wins": 34,
+    "losses": 65,
+    "n": 100,
+    "rate": 0.34,
+    "dollars": 110.86971448815387,
+    "open": 5
    },
    {
     "style": "swing",
-    "wins": 31,
-    "losses": 66,
-    "n": 97,
-    "rate": 0.31958762886597936,
-    "dollars": -200.0,
-    "open": 18
+    "wins": 45,
+    "losses": 86,
+    "n": 131,
+    "rate": 0.3435114503816794,
+    "dollars": 200.0,
+    "open": 34
    }
   ],
   "top": [
@@ -37,7 +37,16 @@
     "strike": 347.5,
     "expiry": "2026-11-09",
     "peak": 14.624999999999998,
-    "now": 0.45535714285714257,
+    "now": 4.6964329310825885,
+    "style": "short"
+   },
+   {
+    "ticker": "BABA",
+    "side": "put",
+    "strike": 99.0,
+    "expiry": "2026-11-13",
+    "peak": 10.431376139322916,
+    "now": 8.11764705882353,
     "style": "short"
    },
    {
@@ -54,8 +63,8 @@
     "side": "call",
     "strike": 275.0,
     "expiry": "2026-11-27",
-    "peak": 6.661538490882286,
-    "now": 4.461538461538461,
+    "peak": 7.19230739886944,
+    "now": 1.3807692307692303,
     "style": "swing"
    },
    {
@@ -63,21 +72,49 @@
     "side": "put",
     "strike": 170.0,
     "expiry": "2026-11-20",
-    "peak": 5.054421509204268,
-    "now": 3.9149659863945576,
-    "style": "swing"
-   },
-   {
-    "ticker": "CCL",
-    "side": "call",
-    "strike": 27.0,
-    "expiry": "2026-11-13",
-    "peak": 4.193181471391157,
-    "now": 2.130681818181818,
+    "peak": 6.312925170068027,
+    "now": 1.074829931972789,
     "style": "swing"
    }
   ],
-  "sector": []
+  "sector": [
+   {
+    "group": "defensive",
+    "side": "call",
+    "wins": 0,
+    "n": 1
+   },
+   {
+    "group": "defensive",
+    "side": "put",
+    "wins": 1,
+    "n": 4
+   },
+   {
+    "group": "other",
+    "side": "call",
+    "wins": 0,
+    "n": 12
+   },
+   {
+    "group": "other",
+    "side": "put",
+    "wins": 5,
+    "n": 7
+   },
+   {
+    "group": "tech",
+    "side": "call",
+    "wins": 3,
+    "n": 3
+   },
+   {
+    "group": "tech",
+    "side": "put",
+    "wins": 1,
+    "n": 3
+   }
+  ]
  },
  "futures": {
   "time": "2026-11-12T20:52:35.739738-06:00",
@@ -1755,5 +1792,87 @@
    "XLV": -0.0037156911940152693,
    "XLY": -0.0012231833928029179
   }
+ },
+ "futures_review": {
+  "time": "2026-11-13T16:37:37.476390-06:00",
+  "stats": [
+   {
+    "name": "ALL",
+    "logged": 4,
+    "filled": 0,
+    "wins": 0,
+    "losses": 0,
+    "timed": 0,
+    "nofill": 4,
+    "open": 0,
+    "total_r": 0.0,
+    "avg_r": 0.0,
+    "dollars_micro": 0.0
+   },
+   {
+    "name": "MES",
+    "logged": 2,
+    "filled": 0,
+    "wins": 0,
+    "losses": 0,
+    "timed": 0,
+    "nofill": 2,
+    "open": 0,
+    "total_r": 0.0,
+    "avg_r": 0.0,
+    "dollars_micro": 0.0
+   },
+   {
+    "name": "MGC",
+    "logged": 2,
+    "filled": 0,
+    "wins": 0,
+    "losses": 0,
+    "timed": 0,
+    "nofill": 2,
+    "open": 0,
+    "total_r": 0.0,
+    "avg_r": 0.0,
+    "dollars_micro": 0.0
+   }
+  ],
+  "recent": [
+   {
+    "contract": "MGC",
+    "tf": "15m",
+    "dir": 1,
+    "time": "2026-11-12T20:52:35.739738-06:00",
+    "entry": 3890.2,
+    "grade": "NO FILL",
+    "result_r": 0.0
+   },
+   {
+    "contract": "MES",
+    "tf": "1h",
+    "dir": 1,
+    "time": "2026-11-09T17:52:17.748734-06:00",
+    "entry": 7452.0,
+    "grade": "NO FILL",
+    "result_r": 0.0
+   },
+   {
+    "contract": "MES",
+    "tf": "1h",
+    "dir": 1,
+    "time": "2026-11-09T17:12:04.836531-06:00",
+    "entry": 7451.75,
+    "grade": "NO FILL",
+    "result_r": 0.0
+   },
+   {
+    "contract": "MGC",
+    "tf": "1h",
+    "dir": 1,
+    "time": "2026-11-08T20:46:44.812670-06:00",
+    "entry": 4087.2,
+    "grade": "NO FILL",
+    "result_r": 0.0
+   }
+  ]
  }
 }
