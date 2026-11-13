@@ -104,7 +104,7 @@ MAX_SPREAD_PCT = 0.20  # skip contracts with (ask - bid) / mid above 20%
 REQUIRE_BOX = False    # True = only list/log picks with a clean box breakout/retest (B tag)
 SKIP_WARNINGS = True   # never list picks carrying a WARNING (! tag)
 BREAK_MARGIN_ATR = 0.15  # Box Watch: price must clear the edge by this many ATRs to count as breaking
-SCANNER_VERSION = "v31"  # written to the log so the review can tell versions apart
+SCANNER_VERSION = "v32"  # written to the log so the review can tell versions apart
 
 WEIGHTS = {  # max points per signal; total = 100
     "unusual_flow": 25,   # near-the-money volume vs open interest
@@ -896,6 +896,17 @@ def print_overnight(df):
             print(f"   avg best next day:    {hi.mean():+.0%}")
             print(f"   doubled by next day:  {(hi >= 1).mean():.0%}")
     print("   (option daily bars; the open is the first trade of the day)")
+    # Potter: contracts are cheaper late in the day. Same contract, same day, both scans.
+    both = df[df["contract"].fillna("").astype(str) != ""]
+    am = both[both["session"] == "am"][["scan", "contract", "entry"]]
+    pm = both[both["session"] == "pm"][["scan", "contract", "entry"]]
+    m = am.merge(pm, on=["scan", "contract"], suffixes=("_am", "_pm"))
+    m = m[(m["entry_am"] > 0) & (m["entry_pm"] > 0)]
+    if len(m):
+        chg = m["entry_pm"] / m["entry_am"] - 1
+        print(f"\n   same contract in both scans ({len(m)}):")
+        print(f"   cheaper at 2:15 than 11:30: {(chg < 0).mean():.0%}")
+        print(f"   typical price change:       {chg.median():+.0%}")
 
 
 def print_lottery(df):
@@ -1002,7 +1013,8 @@ def run_review(today):
                             grade=grade, gdate=gdate, gest=gest, grade2=grade2, split=split,
                             earn=earn_pick,
                             group=r.get("group", ""), with_sector=r.get("with_sector", ""),
-                            session=r.get("session", "am"), nopen=nopen, nhigh=nhigh))
+                            session=r.get("session", "am"), nopen=nopen, nhigh=nhigh,
+                            contract=r.get("contract", "")))
     if not out:
         print("Nothing to grade yet. Picks need at least")
         print("one trading day after the scan.")
