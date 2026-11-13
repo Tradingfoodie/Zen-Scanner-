@@ -18,7 +18,7 @@ import pandas as pd
 OR_MIN = 30
 
 
-def day_trades(df):
+def day_trades(df, or_min=30):
     out = []
     df = df.dropna(subset=["Open", "High", "Low", "Close"])
     if df.empty:
@@ -29,9 +29,10 @@ def day_trades(df):
     for day, d in df.groupby(df.index.date):
         if len(d) < 60:
             continue
-        orw = d.between_time("09:30", "09:55")       # six 5-min bars = 30 minutes
-        rest = d.between_time("10:00", "15:55")
-        if len(orw) < 6 or rest.empty:
+        end = (dt.datetime(2000, 1, 1, 9, 30) + dt.timedelta(minutes=or_min))
+        orw = d.between_time("09:30", (end - dt.timedelta(minutes=5)).strftime("%H:%M"))
+        rest = d.between_time(end.strftime("%H:%M"), "15:55")
+        if len(orw) < or_min // 5 or rest.empty:
             continue
         hi, lo = float(orw["High"].max()), float(orw["Low"].min())
         R = hi - lo
@@ -95,6 +96,52 @@ def summary(g, title):
              f"   held to close:             {g['close_pct'].mean():+.2%} avg",
              ""]
     return "\n".join(lines) + "\n"
+
+
+def build(data, tick, market, or_min):
+    rows, spy_dir = [], {}
+    for t in tick:
+        try:
+            df = data[t]
+        except Exception:
+            continue
+        trades = day_trades(df, or_min)
+        for tr in trades:
+            tr["ticker"] = t
+        if t == "SPY":
+            spy_dir = {tr["day"]: tr["side"] for tr in trades}
+        if t not in market:
+            rows.extend(trades)
+    if not rows:
+        return None
+    ev = pd.DataFrame(rows).sort_values(["day", "ticker"])
+    ev["rvol"] = ev.groupby("ticker")["or_vol"].transform(lambda s: s / s.rolling(10, min_periods=5).mean().shift(1))
+    ev["spy"] = ev["day"].map(spy_dir)
+    return ev
+
+
+def run_volume(yf, tickers, market=("SPY", "QQQ")):
+    """Follow-up: high-volume opens only, both halves, 15 vs 30-minute ranges."""
+    tick = sorted(set(list(tickers) + list(market)))
+    data = yf.download(tick, period="60d", interval="5m", group_by="ticker", auto_adjust=False,
+                       prepost=False, progress=False, threads=True)
+    out = ["ZEN ORB FOLLOW-UP: high-volume opens (opening-range volume 1.5x+ the stock's 10-day average)\n"]
+    for or_min in (15, 30):
+        ev = build(data, tick, market, or_min)
+        if ev is None:
+            return "No data came back. Yahoo may be throttling; try again later."
+        days = sorted(ev["day"].unique())
+        half = days[len(days) // 2]
+        hv = ev[ev["rvol"] >= 1.5]
+        out.append(f"===== {or_min}-MINUTE RANGE ({days[0]} to {days[-1]}) =====\n")
+        out.append(summary(ev, f"All breakouts ({or_min} min), for comparison"))
+        out.append(summary(hv, "HIGH VOLUME, all"))
+        out.append(summary(hv[hv["day"] < half], "HIGH VOLUME, first half"))
+        out.append(summary(hv[hv["day"] >= half], "HIGH VOLUME, second half"))
+        out.append(summary(hv[hv["spy"] == hv["side"]], "HIGH VOLUME + same direction as SPY"))
+        out.append(summary(ev[ev["rvol"] >= 2.0], "VERY HIGH VOLUME (2x+)"))
+    out.append("Edge = above +0.10R in BOTH halves. Anything less is not worth an alert.")
+    return "\n".join(out)
 
 
 def run(yf, tickers, market=("SPY", "QQQ")):

@@ -95,10 +95,12 @@ def send_evening_alert():
         print("evening alert failed:", e)
 
 
-if mode == "orb-test":
+if mode in ("orb-test", "orb-volume"):
     import orb_test
-    out = capture_safe(lambda: print(orb_test.run(z.yf, z.DEFAULT_UNIVERSE)))
-    open("ORB_TEST.md", "w").write(f"# Zen ORB test\n\n{stamp}\n\n```\n{out.strip()}\n```\n")
+    fn = orb_test.run_volume if os.environ.get("ZEN_MODE", "").endswith("volume") else orb_test.run
+    out = capture_safe(lambda: print(fn(z.yf, z.DEFAULT_UNIVERSE)))
+    fname = "ORB_VOLUME.md" if mode == "orb-volume" else "ORB_TEST.md"
+    open(fname, "w").write(f"# Zen ORB test\n\n{stamp}\n\n```\n{out.strip()}\n```\n")
     print(out)
     sys.exit(0)
 
