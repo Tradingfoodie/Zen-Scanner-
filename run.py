@@ -92,16 +92,26 @@ if mode == "futures":
         except Exception as e:
             print("website futures update failed:", e)
 elif mode == "scan":
+    # Midday scan (~11:30) and evening scan (~2:15, before the 3:00 close; Potter's
+    # "buy into the overnight" idea). Each is logged with its session so the review can compare.
+    session = "pm" if now.time() >= dt.time(14, 0) else "am"
+    z.SESSION = session
     if not manual:
-        # Two schedules cover daylight-saving time; only the one near 11:30 Central runs.
-        if not (dt.time(11, 0) <= now.time() <= dt.time(14, 0)):
-            print("Not scan time yet (Central):", stamp)
+        windows = {"am": (dt.time(11, 0), dt.time(13, 30)), "pm": (dt.time(14, 0), dt.time(14, 50))}
+        a, b = windows[session]
+        if not (a <= now.time() <= b):
+            print("Not scan time (Central):", stamp)
             sys.exit(0)
-        if os.path.exists("README.md") and f"Scan {now:%Y-%m-%d}" in open("README.md").read():
-            print("Already scanned today.")
+        key = f"{now:%Y-%m-%d} {session}"
+        done = zen_site.load().get("scan_keys", [])
+        legacy = (session == "am" and os.path.exists("README.md")
+                  and f"Scan {now:%Y-%m-%d}" in open("README.md").read())
+        if key in done or legacy:
+            print("Already scanned:", key)
             sys.exit(0)
     out = capture(z.run_scan, list(z.DEFAULT_UNIVERSE), z.market_today())
-    body = (f"# Zen Scanner\n\n**Scan {now:%Y-%m-%d}** · {stamp}\n\n"
+    label = "Scan" if session == "am" else "Evening scan"
+    body = (f"# Zen Scanner\n\n**{label} {now:%Y-%m-%d}** · {stamp}\n\n"
             f"```\n{out.strip()}\n```\n\n"
             "[Latest weekend review](REVIEW.md) · [Futures](FUTURES.md) · "
             "Research tool, not financial advice.\n")
@@ -111,6 +121,10 @@ elif mode == "scan":
             zen_site.update_scan(z, now)
         except Exception as e:
             print("website scan update failed:", e)
+    if not manual:
+        d = zen_site.load()
+        d["scan_keys"] = (d.get("scan_keys", []) + [f"{now:%Y-%m-%d} {session}"])[-20:]
+        zen_site.save(d)
 else:
     out = capture(z.run_review, z.market_today())
     fout = capture_safe(zf.run_review, now)

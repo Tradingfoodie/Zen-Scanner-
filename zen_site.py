@@ -105,7 +105,7 @@ def update_scan(z, now):
     for w in s.get("watches") or []:
         watches.append(dict(ticker=w["ticker"], status=w["status"], top=w["top"],
                             bot=w["bot"], mid=w["mid"], price=w["price"]))
-    d["scan"] = dict(time=now.isoformat(), picks=picks, watches=watches,
+    d["scan"] = dict(time=now.isoformat(), picks=picks, watches=watches, session=getattr(z, "SESSION", "am"),
                      rs={k: v for k, v in (s.get("rs") or {}).items()})
     try:
         d["desk"] = desk_signals(z.yf)
@@ -532,7 +532,7 @@ def render():
 <style>{CSS}</style></head><body><main>
 <div class="top"><div><h1>ZEN QUANT DESK</h1>
 <p>REAL DATA · BOX SCANNER · SECTOR FLOW · FUTURES DESK</p></div>
-<div class="live"><span class="dot"></span>Last scan {esc(fmt_time(scan.get("time", "")))} · futures {esc(fmt_time((d.get("futures") or {}).get("time", "")))}</div></div>
+<div class="live"><span class="dot"></span>Last scan {esc(fmt_time(scan.get("time", "")))}{" (evening)" if scan.get("session") == "pm" else ""} · futures {esc(fmt_time((d.get("futures") or {}).get("time", "")))}</div></div>
 
 <section><h2>MARKET DESK</h2>{desk_html(d.get("desk"))}
 <p class="note">Hourly bars, ~15 min delayed. The April dashboard's three signals, now on real prices. Untested: context, not trade calls.</p></section>

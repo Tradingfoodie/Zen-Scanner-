@@ -104,7 +104,7 @@ MAX_SPREAD_PCT = 0.20  # skip contracts with (ask - bid) / mid above 20%
 REQUIRE_BOX = False    # True = only list/log picks with a clean box breakout/retest (B tag)
 SKIP_WARNINGS = True   # never list picks carrying a WARNING (! tag)
 BREAK_MARGIN_ATR = 0.15  # Box Watch: price must clear the edge by this many ATRs to count as breaking
-SCANNER_VERSION = "v30"  # written to the log so the review can tell versions apart
+SCANNER_VERSION = "v31"  # written to the log so the review can tell versions apart
 
 WEIGHTS = {  # max points per signal; total = 100
     "unusual_flow": 25,   # near-the-money volume vs open interest
@@ -641,6 +641,7 @@ def tag_sectors(df, rs):
     return df
 
 
+SESSION = "am"     # "am" = midday scan (~11:30 CT), "pm" = evening scan (~2:15 CT, before the close)
 LAST_SCAN = {}     # structured results of the latest scan (used by the website)
 LAST_REVIEW = None  # graded picks from the latest review (used by the website)
 
@@ -717,6 +718,7 @@ def run_scan(tickers, today, styles=("swing", "short", "lotto")):
     new = pd.concat(keep, ignore_index=True)
     new.insert(0, "scan_date", today)
     new["ver"] = SCANNER_VERSION
+    new["session"] = SESSION
     rs = {}
     try:
         rs = sector_strength()
@@ -872,6 +874,30 @@ def print_sector_test(df):
     print("   tech calls 18%. Under ~20 picks a group = too early.")
 
 
+def print_overnight(df):
+    """Potter's idea: buy near the close, sell into the next morning's move.
+    Compares evening (pm) picks with midday (am) picks on the first trading day after the scan."""
+    if "session" not in df.columns:
+        return
+    d = df[df["nopen"].notna()]
+    if d.empty or not (d["session"] == "pm").any():
+        return
+    print("\n===== OVERNIGHT TEST (evening vs midday) =====")
+    print("first trading day after the scan\n")
+    for lab, ses in (("EVENING picks (~2:15 PM)", "pm"), ("MIDDAY picks (~11:30 AM)", "am")):
+        g = d[d["session"] == ses]
+        if g.empty:
+            continue
+        hi = g["nhigh"].dropna()
+        print(lab, f"({len(g)})")
+        print(f"   up at next open:      {(g['nopen'] > 0).mean():.0%}")
+        print(f"   avg at next open:     {g['nopen'].mean():+.0%}")
+        if len(hi):
+            print(f"   avg best next day:    {hi.mean():+.0%}")
+            print(f"   doubled by next day:  {(hi >= 1).mean():.0%}")
+    print("   (option daily bars; the open is the first trade of the day)")
+
+
 def print_lottery(df):
     """Lottery list: did the cheap contract DOUBLE at any point before expiry?
     Graded as 'sell the whole thing at +100% if it gets there, else ride to expiry'."""
@@ -911,7 +937,10 @@ def run_review(today):
     log["style"] = log["style"].fillna("short")
     log = log[log["scan_date"].dt.weekday < 5]   # ignore any weekend scans (stale data)
     # If you scanned more than once in a day, keep only that day's last pick per stock.
-    log = log.drop_duplicates(subset=["scan_date", "style", "ticker"], keep="last")
+    if "session" not in log.columns:
+        log["session"] = "am"
+    log["session"] = log["session"].fillna("am")
+    log = log.drop_duplicates(subset=["scan_date", "session", "style", "ticker"], keep="last")
     # 11/6 9:03am: an old copy of the scanner logged non-box picks by mistake. Skip those.
     ver = log["ver"] if "ver" in log.columns else pd.Series(pd.NA, index=log.index)
     bs = log["box_state"] if "box_state" in log.columns else pd.Series("", index=log.index)
@@ -959,6 +988,12 @@ def run_review(today):
             grade2, _, _ = exit_grade(oh, entry, fr, pr, exp_d < today, CUT_WIDE)
             split = split_exit(oh, entry, grade, gdate, fr)
             earn_pick = "earnings" in str(r.get("why", ""))
+            # Overnight test: what the contract did on the first trading day after the scan.
+            nopen = nhigh = None
+            if oh is not None and len(oh) and entry > 0:
+                o1, h1 = nz(oh["Open"].iloc[0]), nz(oh["High"].iloc[0])
+                nopen = o1 / entry - 1 if o1 > 0 else None
+                nhigh = h1 / entry - 1 if h1 > 0 else None
             bs = r.get("box_state", "")
             out.append(dict(style=r["style"], box=bs if isinstance(bs, str) else "",
                             scan=scan_d, ticker=sym, side=r["side"], strike=k,
@@ -966,7 +1001,8 @@ def run_review(today):
                             final_ret=fr, peak_ret=pr, score=r["score"],
                             grade=grade, gdate=gdate, gest=gest, grade2=grade2, split=split,
                             earn=earn_pick,
-                            group=r.get("group", ""), with_sector=r.get("with_sector", "")))
+                            group=r.get("group", ""), with_sector=r.get("with_sector", ""),
+                            session=r.get("session", "am"), nopen=nopen, nhigh=nhigh))
     if not out:
         print("Nothing to grade yet. Picks need at least")
         print("one trading day after the scan.")
@@ -980,6 +1016,7 @@ def run_review(today):
     print_top_runners(df)
     print_sector_test(df)
     print_lottery(df)
+    print_overnight(df)
     for style in ("swing", "short"):
         g = df[df["style"] == style]
         if g.empty:

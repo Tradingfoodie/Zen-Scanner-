@@ -3,6 +3,9 @@ on:
   schedule:
     - cron: "30 16 * * 1-5"   # 11:30 Central in summer (stock scan)
     - cron: "30 17 * * 1-5"   # 11:30 Central in winter
+    # Evening scan before the close (Potter: buy into the overnight move), ~2:17 PM Central
+    # with a backup 20 min later; summer and winter copies. Must finish before the 3:00 close.
+    - cron: "17,37 19,20 * * 1-5"
     - cron: "0 15 * * 6"      # Saturday review
     # Futures, Sun-Thu evenings. GitHub drops or delays runs at busy times (on the hour),
     # so each scan is scheduled at odd minutes with a backup 30 min later; whichever runs
