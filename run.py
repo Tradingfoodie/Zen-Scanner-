@@ -95,6 +95,13 @@ def send_evening_alert():
         print("evening alert failed:", e)
 
 
+if mode == "orb-test":
+    import orb_test
+    out = capture_safe(lambda: print(orb_test.run(z.yf, z.DEFAULT_UNIVERSE)))
+    open("ORB_TEST.md", "w").write(f"# Zen ORB test\n\n{stamp}\n\n```\n{out.strip()}\n```\n")
+    print(out)
+    sys.exit(0)
+
 if mode == "alert-test":
     zf.send_test_alert(now)
     sys.exit(0)
