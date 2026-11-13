@@ -66,6 +66,35 @@ def capture_safe(fn, *a):
         return f"{fn.__name__} failed: {e}"
 
 
+def send_evening_alert():
+    """Phone alert when the evening (pre-close) picks are ready: the top picks by score,
+    each marked with or against the sector flow."""
+    topic = os.environ.get("NTFY_TOPIC", "").strip()
+    if not topic:
+        return
+    picks = z.LAST_SCAN.get("picks")
+    if picks is None or picks.empty:
+        title, body = "Zen evening scan: no picks", "Nothing passed the filters. Check the box list on the site."
+    else:
+        p = picks.copy()
+        p["flow"] = p["with_sector"].fillna("") if "with_sector" in p else ""
+        p = p.sort_values("score", ascending=False).head(6)
+        lines = []
+        for _, r in p.iterrows():
+            side = "C" if r["side"] == "call" else "P"
+            sty = {"short": "short", "lotto": "lottery"}.get(r["style"], "swing")
+            flow = {"with": " · with flow", "against": " · against flow"}.get(r["flow"], "")
+            lines.append(f"{r['ticker']} {side} {r['strike']:g} {str(r['expiry'])[5:10].replace('-', '/')} "
+                         f"${r['mid'] * 100:,.0f} · {sty} {r['score']:.0f}{flow}")
+        n_with = int((picks.get("with_sector", "") == "with").sum()) if "with_sector" in picks else 0
+        title = f"Zen evening picks ready ({len(picks)}, {n_with} with flow)"
+        body = "\n".join(lines) + "\nMarket closes 3:00 PM Central."
+    try:
+        zf.ntfy_send(topic, title, body, tags="crescent_moon", priority="high")
+    except Exception as e:
+        print("evening alert failed:", e)
+
+
 if mode == "alert-test":
     zf.send_test_alert(now)
     sys.exit(0)
@@ -121,6 +150,8 @@ elif mode == "scan":
             zen_site.update_scan(z, now)
         except Exception as e:
             print("website scan update failed:", e)
+    if session == "pm":
+        send_evening_alert()
     if not manual:
         d = zen_site.load()
         d["scan_keys"] = (d.get("scan_keys", []) + [f"{now:%Y-%m-%d} {session}"])[-20:]
