@@ -107,6 +107,12 @@ if mode in ("orb-test", "orb-volume"):
     print(out)
     sys.exit(0)
 
+if mode == "bot":
+    # Extra check-ins for the paper bot (stops, expiration-day exits, +100% sell orders).
+    import zen_bot
+    zen_bot.run(now)
+    sys.exit(0)
+
 if mode == "alert-test":
     zf.send_test_alert(now)
     sys.exit(0)
@@ -164,6 +170,11 @@ elif mode == "scan":
             print("website scan update failed:", e)
     if session == "pm":
         send_evening_alert()
+    try:
+        import zen_bot
+        zen_bot.run(now, z.LAST_SCAN.get("picks"), session)
+    except Exception as e:
+        print("bot step failed:", e)
     if not manual:
         d = zen_site.load()
         d["scan_keys"] = (d.get("scan_keys", []) + [f"{now:%Y-%m-%d} {session}"])[-20:]

@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "scan, futures, review or alert-test"
+        description: "scan, futures, review, bot or alert-test"
         default: "scan"
       trigger:
         description: "leave as manual (the outside timer sends: timer)"
@@ -42,6 +42,8 @@ jobs:
           ZEN_MODE: ${{ github.event.inputs.mode || 'auto' }}
           ZEN_TRIGGER: ${{ github.event.inputs.trigger || '' }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - run: |
           git config user.name "zen-bot"
           git config user.email "zen-bot@users.noreply.github.com"
