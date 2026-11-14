@@ -15,7 +15,10 @@ import zen_site
 z.LOG_FILE = "zen_log.csv"
 z.SHOW_DETAILS = False
 now = dt.datetime.now(ZoneInfo("America/Chicago"))
-manual = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
+# Runs started by the outside timer (cron-job.org, trigger=timer) behave like scheduled runs:
+# same time windows, no double scans. Only runs started by hand skip those checks.
+manual = (os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
+          and os.environ.get("ZEN_TRIGGER", "").strip().lower() != "timer")
 mode = os.environ.get("ZEN_MODE", "auto").strip().lower()
 stamp = now.strftime("%a %m/%d %I:%M %p Central")
 
