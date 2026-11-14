@@ -300,7 +300,8 @@ def scan_contract(spec, frames):
         sig = z.box_signal(df)
         if sig and sig["state"] in ("retest", "extended"):
             card = setup_card(micro, full, mpv, fpv, tick, tf, df, sig)
-            if card:
+            # Skip breakouts that already reached their target: the move is over.
+            if card and (card["price"] - card["target"]) * card["dir"] < 0:
                 setups.append(card)
         box = z.current_box(df)
         if box:
@@ -382,7 +383,8 @@ def print_futures(setups, watches, now, slot):
 
 # ---- log ------------------------------------------------------------------------
 LOG_COLS = ["scan_time", "slot", "contract", "tf", "dir", "entry", "stop", "target", "top", "bot",
-            "kind", "state", "price", "r", "grade", "result_r", "fill_time", "exit_time"]
+            "kind", "state", "price", "r", "grade", "result_r", "fill_time", "exit_time",
+            "chase_grade", "chase_r"]
 
 
 def read_log():
@@ -392,7 +394,7 @@ def read_log():
     for c in LOG_COLS:
         if c not in log.columns:
             log[c] = np.nan
-    for c in ("slot", "contract", "tf", "kind", "state", "grade", "fill_time", "exit_time"):
+    for c in ("slot", "contract", "tf", "kind", "state", "grade", "fill_time", "exit_time", "chase_grade"):
         log[c] = log[c].astype(object)      # text columns (blank ones load as numbers)
     log["result_r"] = log["result_r"].astype(float)
     return log[LOG_COLS]
@@ -460,6 +462,26 @@ def grade_setup(r, bars, now):
     return "TIME", (float(last["Close"]) - entry) * d / risk, filled.isoformat(), w.index[-1].isoformat()
 
 
+def grade_chase(r, bars, now):
+    """What-if: enter at the price when the setup was logged (no waiting for the punchback).
+    Same stop and target. Returns (grade, result in R of the bigger chase risk)."""
+    t0 = dt.datetime.fromisoformat(str(r["scan_time"]))
+    end = session_end(t0)
+    d, entry, stop, target = int(r["dir"]), float(r["price"]), float(r["stop"]), float(r["target"])
+    risk = (entry - stop) * d
+    if risk <= 0 or (target - entry) * d <= 0:
+        return "n/a", np.nan
+    w = bars[(bars.index > t0) & (bars.index < end)]
+    for _, b in w.iterrows():
+        if (b["Low"] <= stop) if d == 1 else (b["High"] >= stop):
+            return "LOSS", -1.0
+        if (b["High"] >= target) if d == 1 else (b["Low"] <= target):
+            return "WIN", (target - entry) * d / risk
+    if now < end or w.empty:
+        return "open", np.nan
+    return "TIME", (float(w["Close"].iloc[-1]) - entry) * d / risk
+
+
 def run_review(now):
     """Grade every open setup in the futures log and print a scorecard."""
     global LAST_REVIEW
@@ -478,6 +500,16 @@ def run_review(now):
                 continue
             g, rr, ft, et = grade_setup(log.loc[i], b, now)
             log.loc[i, ["grade", "result_r", "fill_time", "exit_time"]] = [g, rr, ft, et]
+        log.to_csv(LOG_FILE, index=False)
+    todo_c = log["chase_grade"].fillna("open") == "open"
+    if todo_c.any():
+        bars = download("15m", "60d")
+        sym = {c[0]: c[2] for c in CONTRACTS}
+        for i in log.index[todo_c]:
+            b = bars.get(sym.get(log.at[i, "contract"]))
+            if b is None:
+                continue
+            log.loc[i, ["chase_grade", "chase_r"]] = list(grade_chase(log.loc[i], b, now))
         log.to_csv(LOG_FILE, index=False)
     LAST_REVIEW = log
     print_review(log)
@@ -513,3 +545,13 @@ def print_review(log):
               f"{s['wins']}W {s['losses']}L {s['timed']} timed-out  "
               f"total {s['total_r']:+.1f}R  avg {s['avg_r']:+.2f}R  ${s['dollars_micro']:+,.0f}"
               f"  ({s['nofill']} no fill, {s['open']} open)")
+    # What-if: entering right away at the logged price instead of waiting for the punchback.
+    c = log[log["chase_grade"].isin(["WIN", "LOSS", "TIME"])]
+    if len(c):
+        cr = c["chase_r"].astype(float)
+        print(f"WHAT IF you entered right away (at the price when logged): "
+              f"{int((c['chase_grade'] == 'WIN').sum())}W {int((c['chase_grade'] == 'LOSS').sum())}L "
+              f"{int((c['chase_grade'] == 'TIME').sum())} timed-out  avg {cr.mean():+.2f}R over {len(c)}")
+    far = log[(log["price"] - log["entry"]) * log["dir"] > 2 * (log["entry"] - log["stop"]).abs()]
+    if len(log):
+        print(f"logged when price was already 2R+ past the entry: {len(far)} of {len(log)}")
