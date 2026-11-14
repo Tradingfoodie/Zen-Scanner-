@@ -1,6 +1,6 @@
 # Zen Review
 
-Sat 11/14 09:29 AM Central
+Sat 11/14 11:36 AM Central
 
 ```
 (skipped 8 picks from the old copy, 11/6 9:03am)
@@ -1772,4 +1772,6 @@ SHORT HOLD-TO-EXPIRY (94 expired)
 ALL  filled 0/4  0W 0L 0 timed-out  total +0.0R  avg +0.00R  $+0  (4 no fill, 0 open)
 MES  filled 0/2  0W 0L 0 timed-out  total +0.0R  avg +0.00R  $+0  (2 no fill, 0 open)
 MGC  filled 0/2  0W 0L 0 timed-out  total +0.0R  avg +0.00R  $+0  (2 no fill, 0 open)
+WHAT IF you entered right away (at the price when logged): 0W 0L 3 timed-out  avg -0.12R over 3
+logged when price was already 2R+ past the entry: 4 of 4
 ```
