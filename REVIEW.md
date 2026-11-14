@@ -1,6 +1,6 @@
 # Zen Review
 
-Fri 11/13 04:37 PM Central
+Sat 11/14 09:29 AM Central
 
 ```
 (skipped 8 picks from the old copy, 11/6 9:03am)
@@ -22,7 +22,7 @@ biggest peaks across all picks
 
 #3 BABA PUT 99  exp 11/13
    short | scanned 11/10 | score 43
-   paid $51 | best +1043% | now +812%
+   paid $51 | best +1053% | now +806%
    box retest | +100% in 2d
 
 #4 LULU CALL 103  exp 10/30
@@ -42,17 +42,17 @@ biggest peaks across all picks
 
 #7 AAPL CALL 360  exp 11/16
    short | scanned 11/10 | score 37
-   paid $46 | best +587% | now +28%
+   paid $46 | best +552% | now +28%
    +100% in 1d
 
 #8 RIOT CALL 13  exp 11/13
    swing | scanned 10/26 | score 60
-   paid $114 | best +442% | now +301%
+   paid $114 | best +442% | now +296%
    earnings | +100% in 9d
 
 #9 CCL CALL 27  exp 11/13
    swing | scanned 10/26 | score 53
-   paid $88 | best +419% | now +157%
+   paid $88 | best +419% | now +153%
    box retest | +100% in 3d
 
 #10 BABA PUT 96  exp 11/27
@@ -87,13 +87,13 @@ NIO CALL 3  exp 12/18
 NKE CALL 42.5  exp 12/18
    scanned 11/12 | score 48
    paid $66 | open
-   now -5% | best +20%
+   now -5% | best +6%
    RULES: still open
 
 WMT CALL 136  exp 12/04
    scanned 11/12 | score 42
    paid $132 | open
-   now +32% | best +44%
+   now +32% | best +32%
    RULES: still open
 
 LCID CALL 3  exp 12/18
@@ -141,7 +141,7 @@ NVO CALL 41  exp 12/04
 NIO PUT 3  exp 12/18
    scanned 11/11 | score 52
    paid $12 | open
-   now +138% | best +142%
+   now +138% | best +138%
    RULES: WIN, hit +100% on 11/13
 
 BABA PUT 90  exp 12/18
@@ -207,7 +207,7 @@ MARA CALL 7  exp 12/18
 WMT CALL 138  exp 12/04
    scanned 11/10 | score 44
    paid $103 | open
-   now +7% | best +7%
+   now +7% | best +38%
    RULES: still open
 
 LCID CALL 4  exp 12/18
@@ -261,7 +261,7 @@ BAC PUT 50  exp 12/18
 BABA PUT 95  exp 11/27
    scanned 11/09 | score 64
    paid $109 | open
-   now +301% | best +361%
+   now +301% | best +333%
    RULES: WIN, hit +100% on 11/12
 
 WMT PUT 111  exp 12/11
@@ -303,7 +303,7 @@ MARA PUT 6.5  exp 12/11
 AAPL CALL 380  exp 12/11
    scanned 11/09 | score 38
    paid $102 | open
-   now +23% | best +116%
+   now +23% | best +113%
    RULES: WIN, hit +100% on 11/13
 
 CVS PUT 83  exp 11/27
@@ -381,7 +381,7 @@ XLE PUT 59.5  exp 12/11
 BABA PUT 95  exp 11/27
    scanned 11/05 | score 58
    paid $136 | open
-   now +222% | best +269%
+   now +222% | best +247%
    RULES: WIN, hit +100% on 11/12
 
 LYFT CALL 17  exp 11/27
@@ -573,7 +573,7 @@ CRM PUT 205  exp 11/20
 BABA PUT 95  exp 11/20
    scanned 11/02 | score 45
    paid $122 | open
-   now +214% | best +261%
+   now +214% | best +252%
    RULES: LOSS, hit -50% on 11/04
 
 UBER PUT 60  exp 12/04
@@ -806,8 +806,8 @@ NIO PUT 3.5  exp 11/27
 
 SOFI PUT 15.5  exp 11/13
    scanned 10/26 | score 63
-   paid $137 | open
-   now -93% | best -51%
+   paid $137 | EXPIRED
+   now -94% | best -51%
    RULES: LOSS, hit -50% on 10/27
 
 AAPL CALL 380  exp 11/27
@@ -818,26 +818,26 @@ AAPL CALL 380  exp 11/27
 
 RIOT CALL 13  exp 11/13
    scanned 10/26 | score 60
-   paid $114 | open
-   now +301% | best +442%
+   paid $114 | EXPIRED
+   now +296% | best +442%
    RULES: WIN, hit +100% on 11/04
 
 PFE CALL 31  exp 11/13
    scanned 10/26 | score 58
-   paid $28 | open
-   now -96% | best +132%
+   paid $28 | EXPIRED
+   now -100% | best +132%
    RULES: WIN, hit +100% on 11/02
 
 UBER PUT 60  exp 11/13
    scanned 10/26 | score 56
-   paid $70 | open
-   now -97% | best +44%
+   paid $70 | EXPIRED
+   now -100% | best +44%
    RULES: LOSS, hit -50% on 11/04
 
 MARA CALL 7  exp 11/13
    scanned 10/26 | score 56
-   paid $64 | open
-   now -98% | best +52%
+   paid $64 | EXPIRED
+   now -100% | best +52%
    RULES: LOSS, hit -50% on 11/05
 
 SNAP CALL 6  exp 11/27
@@ -848,32 +848,32 @@ SNAP CALL 6  exp 11/27
 
 SMCI PUT 29  exp 11/13
    scanned 10/26 | score 54
-   paid $124 | open
+   paid $124 | EXPIRED
    now +72% | best +201%
    RULES: LOSS, hit -50% on 10/27
 
 BABA PUT 93  exp 11/13
    scanned 10/26 | score 54
-   paid $120 | open
-   now -99% | best +7%
+   paid $120 | EXPIRED
+   now -100% | best +7%
    RULES: LOSS, hit -50% on 11/02
 
 VZ PUT 44  exp 11/13
    scanned 10/26 | score 53
-   paid $128 | open
-   now -99% | best +13%
+   paid $128 | EXPIRED
+   now -100% | best +13%
    RULES: LOSS, hit -50% on 10/30
 
 GE PUT 265  exp 11/13
    scanned 10/26 | score 53
-   paid $148 | open
-   now -97% | best -36%
+   paid $148 | EXPIRED
+   now -100% | best -36%
    RULES: LOSS, hit -50% on 10/29
 
 CCL CALL 27  exp 11/13
    scanned 10/26 | score 53
-   paid $88 | open
-   now +157% | best +419%
+   paid $88 | EXPIRED
+   now +153% | best +419%
    RULES: WIN, hit +100% on 10/29
 
 XOM CALL 200  exp 11/27
@@ -884,8 +884,8 @@ XOM CALL 200  exp 11/27
 
 TGT PUT 143  exp 11/13
    scanned 10/26 | score 51
-   paid $126 | open
-   now -92% | best +10%
+   paid $126 | EXPIRED
+   now -100% | best +10%
    RULES: LOSS, hit -50% on 11/02
 
 NIO PUT 3.5  exp 11/27
@@ -902,8 +902,8 @@ F PUT 10.5  exp 11/27
 
 SNAP CALL 7  exp 11/13
    scanned 10/23 | score 64
-   paid $35 | open
-   now -97% | best -9%
+   paid $35 | EXPIRED
+   now -100% | best -9%
    RULES: LOSS, hit -50% on 10/28
 
 SOFI PUT 15  exp 11/27
@@ -914,20 +914,20 @@ SOFI PUT 15  exp 11/27
 
 TGT PUT 143  exp 11/13
    scanned 10/23 | score 60
-   paid $125 | open
-   now -92% | best +86%
+   paid $125 | EXPIRED
+   now -100% | best +86%
    RULES: LOSS, hit -50% on 11/02
 
 PFE CALL 29.5  exp 11/13
    scanned 10/23 | score 59
-   paid $107 | open
-   now -97% | best +81%
+   paid $107 | EXPIRED
+   now -100% | best +81%
    RULES: LOSS, hit -50% on 10/28
 
 LCID PUT 3  exp 11/13
    scanned 10/23 | score 55
-   paid $20 | open
-   now -75% | best +110%
+   paid $20 | EXPIRED
+   now -77% | best +110%
    RULES: WIN, hit +100% on 10/26
 
 UBER PUT 62  exp 11/27
@@ -938,20 +938,20 @@ UBER PUT 62  exp 11/27
 
 LYFT CALL 18.5  exp 11/13
    scanned 10/23 | score 54
-   paid $62 | open
-   now -98% | best +113%
+   paid $62 | EXPIRED
+   now -100% | best +113%
    RULES: LOSS, hit -50% on 10/29
 
 BABA PUT 90  exp 11/13
    scanned 10/23 | score 52
-   paid $56 | open
-   now -98% | best +14%
+   paid $56 | EXPIRED
+   now -100% | best +14%
    RULES: LOSS, hit -50% on 11/02
 
 SMCI PUT 30  exp 11/13
    scanned 10/23 | score 52
-   paid $125 | open
-   now +164% | best +244%
+   paid $125 | EXPIRED
+   now +150% | best +244%
    RULES: WIN, hit +100% on 11/05
 
 NVO PUT 38  exp 11/27
@@ -962,8 +962,8 @@ NVO PUT 38  exp 11/27
 
 VZ PUT 42  exp 11/13
    scanned 10/23 | score 49
-   paid $40 | open
-   now -98% | best +50%
+   paid $40 | EXPIRED
+   now -100% | best +50%
    RULES: LOSS, hit -50% on 10/30
 
 NIO PUT 3.5  exp 11/27
@@ -974,8 +974,8 @@ NIO PUT 3.5  exp 11/27
 
 PYPL CALL 59  exp 11/13
    scanned 10/22 | score 67
-   paid $194 | open
-   now -84% | best +17%
+   paid $194 | EXPIRED
+   now -86% | best +17%
    RULES: LOSS, hit -50% on 10/27
 
 AAL PUT 11.5  exp 11/27
@@ -986,37 +986,37 @@ AAL PUT 11.5  exp 11/27
 
 MSTR PUT 135  exp 11/13
    scanned 10/22 | score 64
-   paid $585 | open
-   now +301% | best +357%
+   paid $585 | EXPIRED
+   now +300% | best +357%
    RULES: WIN, hit +100% on 10/30
 
 SMCI PUT 30  exp 11/13
    scanned 10/22 | score 62
-   paid $148 | open
-   now +123% | best +191%
+   paid $148 | EXPIRED
+   now +111% | best +191%
    RULES: LOSS, hit -50% on 10/28
 
 SNAP CALL 7  exp 11/13
    scanned 10/22 | score 61
-   paid $37 | open
-   now -97% | best -3%
+   paid $37 | EXPIRED
+   now -100% | best -3%
    RULES: LOSS, hit -50% on 10/28
 
 TGT CALL 175  exp 11/13
    scanned 10/22 | score 60
-   paid $40 | open
-   now -98% | best +50%
+   paid $40 | EXPIRED
+   now -100% | best +50%
    RULES: LOSS, hit -50% on 10/23
 
 MSFT CALL 560  exp 11/13
    scanned 10/22 | score 60
-   paid $520 | open
+   paid $520 | EXPIRED
    now -100% | best +86%
    RULES: LOSS, hit -50% on 10/29
 
 CRWV CALL 57  exp 11/13
    scanned 10/22 | score 60
-   paid $565 | open
+   paid $565 | EXPIRED
    now -100% | best +73%
    RULES: LOSS, hit -50% on 11/02
 
@@ -1028,13 +1028,13 @@ SOFI PUT 13.5  exp 11/27
 
 LYFT CALL 18.5  exp 11/13
    scanned 10/22 | score 56
-   paid $71 | open
-   now -99% | best +86%
+   paid $71 | EXPIRED
+   now -100% | best +86%
    RULES: LOSS, hit -50% on 10/29
 
 INTC CALL 88  exp 11/13
    scanned 10/22 | score 56
-   paid $565 | open
+   paid $565 | EXPIRED
    now -100% | best +85%
    RULES: LOSS, hit -50% on 10/30
 
@@ -1052,8 +1052,8 @@ NVO PUT 36  exp 11/27
 
 BABA PUT 90  exp 11/13
    scanned 10/22 | score 55
-   paid $56 | open
-   now -98% | best +43%
+   paid $56 | EXPIRED
+   now -100% | best +43%
    RULES: LOSS, hit -50% on 11/02
 
 MCD CALL 275  exp 11/27
@@ -1083,18 +1083,29 @@ SWING EXIT-RULES SCORECARD
      (break-even ~41%) | +$580
    split exit (half at +100%, rest rides,
    rest out if it falls back to entry):
-     -$542 on 131 trades
-     avg win +84% (vs +100% all-out)
+     -$546 on 131 trades
+     avg win +83% (vs +100% all-out)
    peaked +500% or more:  2 of 165
    peaked +1000% or more: 0 of 165
 
+SWING HOLD-TO-EXPIRY (29 expired)
+   profitable:      21%
+   doubled at peak: 31%
+   went to zero:    69%
+   avg return:      -40%
+   high scores win  20%
+   low scores win   21%
+   (if these match, the score
+    has no edge yet)
+   box retests win  18% (11)
+   all others win   22% (18)
 
 ===== SHORT =====
 
 MSFT PUT 510  exp 11/16
    scanned 11/12 | score 37
    paid $79 | open
-   now -5% | best +349%
+   now -5% | best +318%
    RULES: WIN, hit +100% on 11/13
 
 PYPL CALL 60  exp 11/20
@@ -1106,19 +1117,19 @@ PYPL CALL 60  exp 11/20
 MARA CALL 7.5  exp 11/20
    scanned 11/12 | score 36
    paid $50 | open
-   now -61% | best -42%
+   now -61% | best -44%
    RULES: LOSS, hit -50% on 11/13
 
 BAC CALL 51  exp 11/20
    scanned 11/12 | score 35
    paid $64 | open
-   now +9% | best +13%
+   now +9% | best +11%
    RULES: still open
 
 AAPL PUT 350  exp 11/16
    scanned 11/12 | score 34
    paid $72 | open
-   now -43% | best -19%
+   now -43% | best -24%
    RULES: LOSS, hit -50% on 11/13
 
 MARA CALL 7.5  exp 11/20
@@ -1153,80 +1164,80 @@ VZ CALL 46  exp 11/20
 
 LCID CALL 4  exp 11/13
    scanned 11/10 | score 49
-   paid $18 | open
-   now -94% | best -44%
+   paid $18 | EXPIRED
+   now -100% | best -44%
    RULES: LOSS, hit -50% on 11/11
 
 BABA PUT 99  exp 11/13
    scanned 11/10 | score 43
-   paid $51 | open
-   now +812% | best +1043%
+   paid $51 | EXPIRED
+   now +806% | best +1053%
    RULES: WIN, hit +100% on 11/12
 
 AAPL CALL 360  exp 11/16
    scanned 11/10 | score 37
    paid $46 | open
-   now +28% | best +587%
+   now +28% | best +552%
    RULES: WIN, hit +100% on 11/11
 
 BAC CALL 52  exp 11/13
    scanned 11/10 | score 37
-   paid $12 | open
-   now -92% | best -17%
+   paid $12 | EXPIRED
+   now -100% | best -17%
    RULES: LOSS, hit -50% on 11/11
 
 MARA PUT 7  exp 11/13
    scanned 11/10 | score 36
-   paid $30 | open
-   now -92% | best +17%
+   paid $30 | EXPIRED
+   now -97% | best +17%
    RULES: LOSS, hit -50% on 11/11
 
 PLUG CALL 1.5  exp 11/13
    scanned 11/09 | score 59
-   paid $11 | open
-   now -91% | best -27%
+   paid $11 | EXPIRED
+   now -100% | best -27%
    RULES: LOSS, hit -50% on 11/10
 
 SBUX CALL 115  exp 11/13
    scanned 11/09 | score 51
-   paid $12 | open
-   now -92% | best -8%
+   paid $12 | EXPIRED
+   now -100% | best -8%
    RULES: LOSS, hit -50% on 11/10
 
 AAL PUT 14.5  exp 11/13
    scanned 11/09 | score 47
-   paid $60 | open
-   now +89% | best +127%
+   paid $60 | EXPIRED
+   now +122% | best +127%
    RULES: WIN, hit +100% (est.)
 
 TGT PUT 157.5  exp 11/13
    scanned 11/09 | score 46
-   paid $64 | open
-   now -97% | best +288%
+   paid $64 | EXPIRED
+   now -100% | best +288%
    RULES: WIN, hit +100% on 11/10
 
 NVO CALL 42.5  exp 11/13
    scanned 11/09 | score 45
-   paid $20 | open
-   now -95% | best -50%
+   paid $20 | EXPIRED
+   now -100% | best -50%
    RULES: LOSS, hit -50% on 11/10
 
 MARA CALL 6  exp 11/13
    scanned 11/06 | score 59
-   paid $55 | open
+   paid $55 | EXPIRED
    now +80% | best +255%
    RULES: WIN, hit +100% on 11/10
 
 RIOT CALL 16  exp 11/13
    scanned 11/06 | score 51
-   paid $100 | open
-   now +50% | best +213%
+   paid $100 | EXPIRED
+   now +52% | best +213%
    RULES: WIN, hit +100% on 11/09
 
 PLUG CALL 1.5  exp 11/13
    scanned 11/06 | score 50
-   paid $10 | open
-   now -90% | best +20%
+   paid $10 | EXPIRED
+   now -100% | best +20%
    RULES: LOSS, hit -50% on 11/10
 
 AAPL CALL 352.5  exp 11/09
@@ -1237,8 +1248,8 @@ AAPL CALL 352.5  exp 11/09
 
 BAC CALL 52  exp 11/13
    scanned 11/06 | score 48
-   paid $18 | open
-   now -94% | best +44%
+   paid $18 | EXPIRED
+   now -100% | best +44%
    RULES: LOSS, hit -50% on 11/11
 
 MSFT CALL 552.5  exp 11/09
@@ -1249,26 +1260,26 @@ MSFT CALL 552.5  exp 11/09
 
 LCID PUT 3  exp 11/13
    scanned 11/04 | score 69
-   paid $33 | open
-   now -85% | best +18%
+   paid $33 | EXPIRED
+   now -86% | best +18%
    RULES: LOSS, hit -50% on 11/09
 
 PFE CALL 29.5  exp 11/13
    scanned 11/04 | score 64
-   paid $67 | open
-   now -96% | best +190%
+   paid $67 | EXPIRED
+   now -100% | best +190%
    RULES: WIN, hit +100% on 11/05
 
 PYPL CALL 60  exp 11/13
    scanned 11/04 | score 63
-   paid $87 | open
-   now -99% | best +78%
+   paid $87 | EXPIRED
+   now -100% | best +78%
    RULES: LOSS, hit -50% on 11/10
 
 MARA PUT 7  exp 11/13
    scanned 11/04 | score 62
-   paid $53 | open
-   now -95% | best +155%
+   paid $53 | EXPIRED
+   now -98% | best +155%
    RULES: WIN, hit +100% on 11/05
 
 AAPL PUT 317.5  exp 11/09
@@ -1279,8 +1290,8 @@ AAPL PUT 317.5  exp 11/09
 
 PLUG CALL 1.5  exp 11/13
    scanned 11/04 | score 60
-   paid $12 | open
-   now -92% | best -0%
+   paid $12 | EXPIRED
+   now -100% | best -0%
    RULES: LOSS, hit -50% on 11/05
 
 AAPL CALL 347.5  exp 11/09
@@ -1297,14 +1308,14 @@ AMZN PUT 237.5  exp 11/06
 
 LCID PUT 3  exp 11/13
    scanned 11/03 | score 48
-   paid $30 | open
-   now -83% | best +30%
+   paid $30 | EXPIRED
+   now -85% | best +30%
    RULES: LOSS, hit -50% on 11/10
 
 MARA PUT 7  exp 11/13
    scanned 11/03 | score 45
-   paid $56 | open
-   now -96% | best +141%
+   paid $56 | EXPIRED
+   now -98% | best +141%
    RULES: WIN, hit +100% on 11/05
 
 PFE CALL 31  exp 11/06
@@ -1736,22 +1747,22 @@ SHORT EXIT-RULES SCORECARD
      (break-even ~41%) | -$1,119
    split exit (half at +100%, rest rides,
    rest out if it falls back to entry):
-     +$271 on 100 trades
+     +$285 on 100 trades
      avg win +105% (vs +100% all-out)
    peaked +500% or more:  5 of 105
    peaked +1000% or more: 3 of 105
 
-SHORT HOLD-TO-EXPIRY (74 expired)
-   profitable:      14%
-   doubled at peak: 35%
-   went to zero:    78%
-   avg return:      -47%
-   high scores win  8%
-   low scores win   20%
+SHORT HOLD-TO-EXPIRY (94 expired)
+   profitable:      15%
+   doubled at peak: 36%
+   went to zero:    73%
+   avg return:      -42%
+   high scores win  9%
+   low scores win   21%
    (if these match, the score
     has no edge yet)
-   box retests win  12% (24)
-   all others win   14% (50)
+   box retests win  18% (28)
+   all others win   14% (66)
 ```
 
 ## Futures
