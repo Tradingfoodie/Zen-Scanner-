@@ -1,6 +1,6 @@
 # Zen Scanner
 
-**Scan 2026-11-18** · Wed 11/18 11:27 AM Central
+**Evening scan 2026-11-18** · Wed 11/18 02:12 PM Central
 
 ```
 Scanning 83 tickers... (3-6 min)
@@ -15,14 +15,14 @@ Scanning 83 tickers... (3-6 min)
 
 ===== TODAY'S PICKS Wed 11/18 =====
 #  TICKER  STRIKE   EXP   COST SC
-1  TGT   C 177.5  11/20   $34 51L E
-2  XOM   C 175    12/11   $94 45w F
-3  F     C 11.5   11/27   $16 45s F
-4  WMT   C 136    12/11  $144 45w E
-5  GM    P 80     12/11  $145 42w F
-6  CVX   P 190    12/11  $130 42w 
-7  UBER  C 71     11/27   $98 39s 
-8  DIS   C 123    11/27   $99 38s 
+1  NIO   P 2.5    12/11    $8 59w E
+2  LYFT  C 18     12/11   $78 54w F
+3  NFLX  C 65     12/24   $93 50w F
+4  BABA  C 95     12/11  $138 50w E
+5  UBER  C 71     11/27   $82 45s F
+6  XOM   C 167.5  11/27   $83 45s F
+7  F     C 11.5   11/27   $14 45s F
+8  PFE   C 29     11/27   $16 45s F
 s=short w=swing L=lottery | B=box E=earnings
 F=strong flow | !=warning, skip
 
@@ -37,14 +37,14 @@ IN A BOX (set two alerts)
 Saved to your pick log.
 
 SECTOR FLOW (5 days vs SPY)
-   staples  +3.7%
-   discr    +2.4%
+   staples  +3.6%
+   discr    +2.5%
    comm     +1.4%
-   energy   +1.0%
-   indust   +0.4%
-   fin      +0.3%
-   health   +0.1%
-   tech     -2.3%
+   energy   +0.8%
+   indust   +0.3%
+   fin      +0.2%
+   health   -0.1%
+   tech     -2.4%
 ```
 
 [Latest weekend review](REVIEW.md) · [Futures](FUTURES.md) · Research tool, not financial advice.
