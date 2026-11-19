@@ -14,10 +14,14 @@ on:
     - cron: "57 22,23 * * 0-4"   # backup ~5:57 PM Central
     - cron: "7 2,3 * * 1-5"      # ~9:07 PM Central (summer: 02:07 UTC, winter: 03:07 UTC)
     - cron: "37 2,3 * * 1-5"     # backup ~9:37 PM Central
+    # Failed-setup watch every ~15 min through the Asia session (5 PM - 2 AM Central).
+    # Out-of-window runs exit right away (run.py checks the time).
+    - cron: "4,19,34,49 22,23 * * 0-4"
+    - cron: "4,19,34,49 0-7 * * 1-5"
   workflow_dispatch:
     inputs:
       mode:
-        description: "scan, futures, review, bot or alert-test"
+        description: "scan, futures, watch, review, bot or alert-test"
         default: "scan"
       trigger:
         description: "leave as manual (the outside timer sends: timer)"

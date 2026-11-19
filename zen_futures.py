@@ -47,6 +47,8 @@ CHART_BARS = 64              # bars kept for each chart on the website
 SITE_URL = "https://tradingfoodie.github.io/Zen-Scanner-/"
 RTH = (dt.time(8, 30), dt.time(15, 0))   # New York session, Central time
 
+EMA_FAST, EMA_SLOW = 9, 21    # 15m trend check, same rule as ZenFlow's "Trend" row
+FAIL_FRAC = 0.25              # a 15m close this far back past the entry (share of the risk) = failed
 LAST_RUN = {}       # structured results of the latest futures scan (used by the website)
 LAST_REVIEW = None  # graded log of the latest futures review
 
@@ -206,6 +208,26 @@ def key_levels(df):
                 bars_tonight=len(tonight), time=df.index[-1].isoformat())
 
 
+# ---- 15m trend check -------------------------------------------------------------
+def trend_15m(df):
+    """ZenFlow's trend rule on the last 15m bar: up (1) when close > EMA21 and EMA9 > EMA21,
+    down (-1) when both are below, else 0 (mixed). None if there's no data."""
+    if df is None or len(df) < EMA_SLOW * 3:
+        return None
+    c = df["Close"]
+    fast = c.ewm(span=EMA_FAST, adjust=False).mean()
+    slow = c.ewm(span=EMA_SLOW, adjust=False).mean()
+    px, f, sl = float(c.iloc[-1]), float(fast.iloc[-1]), float(slow.iloc[-1])
+    if px > sl and f > sl:
+        return 1
+    if px < sl and f < sl:
+        return -1
+    return 0
+
+
+TREND_WORD = {1: "UP", -1: "DOWN", 0: "MIXED", None: "unknown"}
+
+
 # ---- phone alerts (ntfy) --------------------------------------------------------
 def ntfy_send(topic, title, body, tags="chart_with_upwards_trend", priority="high"):
     """Push one notification to https://ntfy.sh/<topic>. The topic is the only 'password',
@@ -226,7 +248,12 @@ def alert_text(c):
     else:
         head = (f"WATCH: {c['contract']} {c['tf']} {side}, wait for a pullback to {f(c['entry'])} "
                 f"(now {f(c['price'])})")
-    return (f"{head}\n"
+    warn = ""
+    if c.get("counter"):
+        what = "COUNTER-TREND" if c.get("trend15") == -c["dir"] else "TREND NOT CONFIRMED"
+        warn = (f"\n!! {what}: 15m trend is {TREND_WORD[c.get('trend15')]}. "
+                "Treat as a watch until the 15m trend agrees.")
+    return (f"{head}{warn}\n"
             f"Entry {f(c['entry'])}  Stop {f(c['stop'])}  Target {f(c['target'])}\n"
             f"{c['r']:.1f}R  risk ${c['risk_micro']:,.0f}/{c['contract']} (${c['risk_full']:,.0f}/{c['full']})")
 
@@ -290,6 +317,7 @@ def setup_card(micro, full, mpv, fpv, tick, tf, df, sig):
 def scan_contract(spec, frames):
     micro, full, sym, mpv, fpv, tick = spec
     setups, watches = [], []
+    tr15 = trend_15m(dict(frames).get("15m"))
     for tf, df in frames:
         if df is None or len(df) < 80:
             continue
@@ -302,6 +330,8 @@ def scan_contract(spec, frames):
             card = setup_card(micro, full, mpv, fpv, tick, tf, df, sig)
             # Skip breakouts that already reached their target: the move is over.
             if card and (card["price"] - card["target"]) * card["dir"] < 0:
+                card["trend15"] = tr15
+                card["counter"] = tr15 is not None and tr15 != card["dir"]   # against or mixed
                 setups.append(card)
         box = z.current_box(df)
         if box:
@@ -370,6 +400,8 @@ def print_futures(setups, watches, now, slot):
         print(f"{i}. {c['contract']} {c['tf']:>3} {side} {c['state']:<8} "
               f"entry {c['entry']:,.2f}  stop {c['stop']:,.2f}  target {c['target']:,.2f}  "
               f"R {c['r']:.1f}  risk ${c['risk_micro']:,.0f}/micro (${c['risk_full']:,.0f} full)")
+        print(f"   15m trend {TREND_WORD[c.get('trend15')]}"
+              + ("  << trend doesn't agree, treat as a watch" if c.get("counter") else ""))
     live = [w for w in watches if w["status"] in ("up", "down", "inside")]
     if live:
         print("\nBox watch:")
@@ -384,7 +416,7 @@ def print_futures(setups, watches, now, slot):
 # ---- log ------------------------------------------------------------------------
 LOG_COLS = ["scan_time", "slot", "contract", "tf", "dir", "entry", "stop", "target", "top", "bot",
             "kind", "state", "price", "r", "grade", "result_r", "fill_time", "exit_time",
-            "chase_grade", "chase_r"]
+            "chase_grade", "chase_r", "trend15", "failed_time"]
 
 
 def read_log():
@@ -394,7 +426,8 @@ def read_log():
     for c in LOG_COLS:
         if c not in log.columns:
             log[c] = np.nan
-    for c in ("slot", "contract", "tf", "kind", "state", "grade", "fill_time", "exit_time", "chase_grade"):
+    for c in ("slot", "contract", "tf", "kind", "state", "grade", "fill_time", "exit_time", "chase_grade",
+              "failed_time"):
         log[c] = log[c].astype(object)      # text columns (blank ones load as numbers)
     log["result_r"] = log["result_r"].astype(float)
     return log[LOG_COLS]
@@ -418,13 +451,89 @@ def log_setups(setups, now, slot):
         rows.append(dict(scan_time=now.isoformat(), slot=slot, contract=c["contract"], tf=c["tf"],
                          dir=c["dir"], entry=c["entry"], stop=c["stop"], target=c["target"],
                          top=c["top"], bot=c["bot"], kind=c["kind"], state=c["state"],
-                         price=c["price"], r=round(c["r"], 3), grade="open"))
+                         price=c["price"], r=round(c["r"], 3), grade="open",
+                         trend15=c.get("trend15")))
         fresh.append(c)
     if rows:
         new = pd.DataFrame(rows, columns=LOG_COLS)
         log = new if log.empty else pd.concat([log, new], ignore_index=True)
         log.to_csv(LOG_FILE, index=False)
     return fresh
+
+
+# ---- failed-setup watch (every ~15 min during the Asia session) ------------------
+def check_failed(r, bars):
+    """bars: closed 15m OHLC (Central) after the setup was logged. A setup has FAILED when a
+    15m bar closes back past the entry, into the box, by FAIL_FRAC of the risk (a retest that
+    didn't hold). Returns (time, close, why) of the first such bar, or None."""
+    d, entry, stop = int(r["dir"]), float(r["entry"]), float(r["stop"])
+    risk = abs(entry - stop)
+    line = entry - d * FAIL_FRAC * risk
+    for ts, b in bars.iterrows():
+        if (b["Low"] <= stop) if d == 1 else (b["High"] >= stop):
+            return ts, float(b["Close"]), "stop hit"
+        if (b["Close"] < line) if d == 1 else (b["Close"] > line):
+            return ts, float(b["Close"]), "closed back inside the box"
+    return None
+
+
+def failed_text(r, ts, close, why, trend):
+    dec = 1 if r["contract"] == "MGC" else 2
+    f = lambda x: f"{x:,.{dec}f}"
+    side = "LONG" if int(r["dir"]) == 1 else "SHORT"
+    return (f"FAILED: {r['contract']} {r['tf']} {side} from the {dt.datetime.fromisoformat(str(r['scan_time'])):%I:%M %p} alert\n"
+            f"15m bar at {ts:%I:%M %p} {why} (close {f(close)}; entry {f(float(r['entry']))}, "
+            f"stop {f(float(r['stop']))}).\n"
+            f"15m trend now {TREND_WORD[trend]}. If you're in it, the setup is no longer valid.")
+
+
+def run_watch(now):
+    """Check tonight's open setups for a failed retest and push one alert per setup."""
+    log = read_log()
+    if log.empty:
+        print("No futures setups logged.")
+        return 0
+    todo = []
+    for i, r in log.iterrows():
+        if str(r["grade"]) != "open" or str(r["failed_time"]) not in ("", "nan", "None"):
+            continue
+        t0 = dt.datetime.fromisoformat(str(r["scan_time"]))
+        if now >= session_end(t0):
+            continue
+        todo.append(i)
+    if not todo:
+        print("No open setups to watch.")
+        return 0
+    bars = download("15m", "5d")
+    names = {c[0]: c[2] for c in CONTRACTS}
+    topic = os.environ.get("NTFY_TOPIC", "").strip()
+    sent, changed = 0, False
+    for i in todo:
+        r = log.loc[i]
+        df = bars.get(names.get(r["contract"]))
+        if df is None or df.empty:
+            continue
+        t0 = dt.datetime.fromisoformat(str(r["scan_time"]))
+        closed = df[(df.index > t0) & (df.index + dt.timedelta(minutes=15) <= now)]
+        hit = check_failed(r, closed)
+        if not hit:
+            print(f"{r['contract']} {r['tf']} {'long' if int(r['dir']) == 1 else 'short'}: still valid")
+            continue
+        ts, close, why = hit
+        text = failed_text(r, ts, close, why, trend_15m(df[df.index <= ts + dt.timedelta(minutes=1)]))
+        print(text)
+        log.at[i, "failed_time"] = ts.isoformat()
+        changed = True
+        if topic:
+            try:
+                ntfy_send(topic, f"Zen futures: {r['contract']} setup failed", text,
+                          tags="warning", priority="high")
+                sent += 1
+            except Exception as e:
+                print("alert failed:", e)
+    if changed:
+        log.to_csv(LOG_FILE, index=False)
+    return sent
 
 
 # ---- review ---------------------------------------------------------------------

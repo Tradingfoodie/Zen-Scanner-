@@ -27,6 +27,15 @@ stamp = now.strftime("%a %m/%d %I:%M %p Central")
 FUT_SLOTS = [("asia open", dt.time(17, 0), dt.time(19, 0)),
              ("asia mid", dt.time(20, 45), dt.time(23, 0))]
 ASIA_DAYS = (6, 0, 1, 2, 3)   # Sun, Mon, Tue, Wed, Thu
+# The 15-min watch runs also land in these windows; the scan itself waits until these times
+# (Yahoo's data runs ~10 min behind, so a scan right at 5:00 would miss the open).
+SLOT_START = {"asia open": dt.time(17, 10), "asia mid": dt.time(20, 55)}
+
+
+def in_asia_watch():
+    """Sun-Thu 5:00 PM to 2:00 AM Central: open futures setups get checked for a failed retest."""
+    t, wd = now.time(), now.weekday()
+    return (wd in ASIA_DAYS and t >= dt.time(17, 0)) or (wd in (0, 1, 2, 3, 4) and t < dt.time(2, 0))
 
 
 def futures_slot():
@@ -40,10 +49,13 @@ def futures_slot():
 
 if mode == "auto":
     slot = futures_slot()
+    done = slot and zen_site.load().get("futures_key") == f"{now:%Y-%m-%d} {slot}"
     if now.weekday() == 5:
         mode = "review"
-    elif slot:
+    elif slot and not done and now.time() >= SLOT_START[slot]:
         mode = "futures"
+    elif in_asia_watch():
+        mode = "watch"
     elif now.weekday() <= 4:
         mode = "scan"
     else:
@@ -115,6 +127,13 @@ if mode == "bot":
 
 if mode == "alert-test":
     zf.send_test_alert(now)
+    sys.exit(0)
+
+if mode == "watch":
+    # Every ~15 min in the Asia session: alert when tonight's setup fails (15m close back
+    # inside the box past the entry, or the stop is hit). Writes the log only when one fails.
+    n = zf.run_watch(now)
+    print(f"Watch done ({stamp}): {n} failed-setup alert(s) sent.")
     sys.exit(0)
 
 if mode == "futures":
