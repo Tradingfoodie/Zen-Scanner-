@@ -1,6 +1,6 @@
 # Zen Scanner
 
-**Scan 2026-11-19** · Thu 11/19 11:25 AM Central
+**Evening scan 2026-11-19** · Thu 11/19 02:17 PM Central
 
 ```
 Scanning 83 tickers... (3-6 min)
@@ -15,24 +15,24 @@ Scanning 83 tickers... (3-6 min)
 
 ===== TODAY'S PICKS Thu 11/19 =====
 #  TICKER  STRIKE   EXP   COST SC
-1  WMT   C 129    11/27   $76 50s E
-2  MARA  P 7      12/11  $110 47w F
-3  BAC   P 45     12/11   $50 46w 
-4  MARA  C 6.5    11/27   $30 46s F
-5  NKE   C 35     11/27   $54 45s F
-6  BAC   P 46.5   11/27   $30 41s 
-7  UBER  C 69     11/27   $48 41s F
-8  T     P 20.5   12/24   $28 41w 
+1  MARA  P 7      12/11  $108 55w F
+2  WMT   C 129    11/27   $92 53s EF
+3  BAC   P 46     12/11   $56 52w F
+4  PYPL  C 58     11/27   $48 50s F
+5  MARA  C 6.5    11/27   $30 49s F
+6  NFLX  C 59     11/27   $91 48s F
+7  BABA  P 80     11/27   $94 47s E
+8  NKE   P 32     12/24  $108 45w E
 s=short w=swing L=lottery | B=box E=earnings
 F=strong flow | !=warning, skip
 
 BREAKING BOXES (wait for punchback)
-   PANW  ↑ edge 339.92 | now 362.12
-   GS    ↓ edge 865.82 | now 855.88
-   IWM   ↓ edge 268.15 | now 266.79
+   PANW  ↑ edge 339.92 | now 359.42
+   GS    ↓ edge 865.82 | now 851.45
+   IWM   ↓ edge 268.15 | now 265.22
 
 IN A BOX (set two alerts)
-   TSLA  ↑410.16 ↓376.93
+   TSLA  ↑376.93 ↓343.69
    DE    ↑663.70 ↓620.20
    VZ    ↑46.06 ↓45.13
 
@@ -41,14 +41,14 @@ IN A BOX (set two alerts)
 Saved to your pick log.
 
 SECTOR FLOW (5 days vs SPY)
-   staples  +2.8%
-   discr    +2.0%
-   comm     +1.9%
-   indust   +0.1%
-   fin      -0.1%
-   energy   -0.9%
-   health   -0.9%
-   tech     -1.6%
+   staples  +3.8%
+   discr    +1.7%
+   comm     +1.1%
+   fin      +0.8%
+   indust   +0.7%
+   energy   +0.1%
+   health   -0.4%
+   tech     -1.9%
 ```
 
 [Latest weekend review](REVIEW.md) · [Futures](FUTURES.md) · Research tool, not financial advice.
