@@ -1,6 +1,6 @@
 # Zen Scanner
 
-**Evening scan 2026-11-19** · Thu 11/19 02:17 PM Central
+**Scan 2026-11-20** · Fri 11/20 11:23 AM Central
 
 ```
 Scanning 83 tickers... (3-6 min)
@@ -13,42 +13,44 @@ Scanning 83 tickers... (3-6 min)
   70/83 done
   80/83 done
 
-===== TODAY'S PICKS Thu 11/19 =====
+===== TODAY'S PICKS Fri 11/20 =====
 #  TICKER  STRIKE   EXP   COST SC
-1  MARA  P 7      12/11  $108 55w F
-2  WMT   C 129    11/27   $92 53s EF
-3  BAC   P 46     12/11   $56 52w F
-4  PYPL  C 58     11/27   $48 50s F
-5  MARA  C 6.5    11/27   $30 49s F
-6  NFLX  C 59     11/27   $91 48s F
-7  BABA  P 80     11/27   $94 47s E
-8  NKE   P 32     12/24  $108 45w E
+1  NIO   P 2.5    12/11   $20 69w EF
+2  SOFI  P 12.5   11/27   $32 52s F
+3  SOFI  P 12.5   11/27   $32 52L F
+4  WMT   C 134    11/27   $47 47L F
+5  PYPL  C 56     11/27   $38 47L F
+6  PYPL  C 56     11/27   $38 47s F
+7  MARA  P 6      12/24  $106 46w F
+8  XLF   P 53     12/11   $48 46w 
 s=short w=swing L=lottery | B=box E=earnings
 F=strong flow | !=warning, skip
 
 BREAKING BOXES (wait for punchback)
-   PANW  ↑ edge 339.92 | now 359.42
-   GS    ↓ edge 865.82 | now 851.45
-   IWM   ↓ edge 268.15 | now 265.22
+   AMZN  ↓ edge 257.37 | now 251.04
+   NKE   ↓ edge 34.33 | now 33.49
+   DE    ↓ edge 620.20 | now 611.99
 
 IN A BOX (set two alerts)
+   WMT   ↑130.90 ↓127.02
    TSLA  ↑376.93 ↓343.69
-   DE    ↑663.70 ↓620.20
-   VZ    ↑46.06 ↓45.13
+   UBER  ↑68.38 ↓65.25
+   LLY   ↑1402.10 ↓1350.45
+   SBUX  ↑106.73 ↓103.52
 
 (Full cards hidden. Set SHOW_DETAILS = True
  in the settings to see them.)
 Saved to your pick log.
 
 SECTOR FLOW (5 days vs SPY)
-   staples  +3.8%
-   discr    +1.7%
-   comm     +1.1%
-   fin      +0.8%
-   indust   +0.7%
-   energy   +0.1%
-   health   -0.4%
-   tech     -1.9%
+   staples  +6.2%
+   discr    +2.2%
+   health   +1.6%
+   fin      +1.3%
+   energy   +1.2%
+   indust   +0.8%
+   comm     +0.8%
+   tech     -3.6%
 ```
 
 [Latest weekend review](REVIEW.md) · [Futures](FUTURES.md) · Research tool, not financial advice.
