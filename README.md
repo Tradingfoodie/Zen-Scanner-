@@ -1,6 +1,6 @@
 # Zen Scanner
 
-**Evening scan 2026-11-20** · Fri 11/20 02:12 PM Central
+**Scan 2026-11-23** · Mon 11/23 11:26 AM Central
 
 ```
 Scanning 83 tickers... (3-6 min)
@@ -13,44 +13,42 @@ Scanning 83 tickers... (3-6 min)
   70/83 done
   80/83 done
 
-===== TODAY'S PICKS Fri 11/20 =====
+===== TODAY'S PICKS Mon 11/23 =====
 #  TICKER  STRIKE   EXP   COST SC
-1  RIOT  C 16.5   11/27   $88 62s BF
-2  AAPL  P 332.5  11/23   $64 53s F
-3  SOFI  P 12.5   11/27   $42 53s F
-4  SOFI  P 12.5   11/27   $42 53L F
-5  MARA  P 5      11/27   $24 52s F
-6  MARA  P 5.5    12/11   $74 52w F
-7  AAPL  C 355    11/23   $38 49L F
-8  BAC   C 48.5   11/27   $38 49L F
+1  AMZN  C 285    12/11  $100 56w F
+2  NIO   P 2.5    12/11   $16 53w E
+3  IWM   P 255    11/27   $80 52s B
+4  CCL   C 28.5   11/27   $30 51s F
+5  CCL   C 28.5   11/27   $30 51L F
+6  AAL   C 13     11/27   $12 49s F
+7  AAL   C 13     11/27   $12 49L F
+8  LCID  P 2.5    12/11   $22 48w F
 s=short w=swing L=lottery | B=box E=earnings
 F=strong flow | !=warning, skip
 
 BREAKING BOXES (wait for punchback)
-   AMZN  ↓ edge 257.37 | now 248.20
-   UBER  ↓ edge 65.25 | now 64.32
-   NKE   ↓ edge 34.33 | now 33.33
-   DE    ↓ edge 620.20 | now 608.02
+   CRWD  ↓ edge 216.90 | now 207.00
 
 IN A BOX (set two alerts)
-   WMT   ↑130.90 ↓127.02
-   TSLA  ↑376.93 ↓343.69
-   LLY   ↑1402.10 ↓1350.45
-   SBUX  ↑106.73 ↓103.52
+   WMT   ↑130.90 ↓127.27
+   AMD   ↑504.97 ↓404.40
+   AMZN  ↑258.26 ↓243.01
+   TSLA  ↑410.16 ↓376.93
+   LLY   ↑1400.43 ↓1347.11
 
 (Full cards hidden. Set SHOW_DETAILS = True
  in the settings to see them.)
 Saved to your pick log.
 
 SECTOR FLOW (5 days vs SPY)
-   staples  +6.5%
-   health   +2.4%
-   discr    +2.3%
-   energy   +1.8%
-   fin      +1.7%
-   indust   +1.2%
-   comm     +0.5%
-   tech     -4.0%
+   discr    +1.5%
+   tech     +1.0%
+   indust   +0.4%
+   staples  -0.2%
+   comm     -1.1%
+   fin      -1.9%
+   health   -2.3%
+   energy   -3.1%
 ```
 
 [Latest weekend review](REVIEW.md) · [Futures](FUTURES.md) · Research tool, not financial advice.
