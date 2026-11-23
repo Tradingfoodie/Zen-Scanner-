@@ -48,7 +48,8 @@ SITE_URL = "https://tradingfoodie.github.io/Zen-Scanner-/"
 RTH = (dt.time(8, 30), dt.time(15, 0))   # New York session, Central time
 
 EMA_FAST, EMA_SLOW = 9, 21    # 15m trend check, same rule as ZenFlow's "Trend" row
-FAIL_FRAC = 0.25              # a 15m close this far back past the entry (share of the risk) = failed
+FAIL_FRAC = 0.25              # a 15m close this far back past the entry (share of the risk) ...
+FAIL_CLOSES = 2               # ... for this many 15m closes in a row = failed (or the stop is hit)
 LAST_RUN = {}       # structured results of the latest futures scan (used by the website)
 LAST_REVIEW = None  # graded log of the latest futures review
 
@@ -463,17 +464,22 @@ def log_setups(setups, now, slot):
 
 # ---- failed-setup watch (every ~15 min during the Asia session) ------------------
 def check_failed(r, bars):
-    """bars: closed 15m OHLC (Central) after the setup was logged. A setup has FAILED when a
-    15m bar closes back past the entry, into the box, by FAIL_FRAC of the risk (a retest that
-    didn't hold). Returns (time, close, why) of the first such bar, or None."""
+    """bars: closed 15m OHLC (Central) after the setup was logged. A setup has FAILED when
+    FAIL_CLOSES 15m bars in a row close back past the entry, into the box, by FAIL_FRAC of the
+    risk (a retest that didn't hold), or when the stop is hit. One close back inside isn't enough:
+    on 11/18 a 15m long closed inside once at 9:00 PM and still went on to hit its target.
+    Returns (time, close, why) of the bar that confirms it, or None."""
     d, entry, stop = int(r["dir"]), float(r["entry"]), float(r["stop"])
     risk = abs(entry - stop)
     line = entry - d * FAIL_FRAC * risk
+    run = 0
     for ts, b in bars.iterrows():
         if (b["Low"] <= stop) if d == 1 else (b["High"] >= stop):
             return ts, float(b["Close"]), "stop hit"
-        if (b["Close"] < line) if d == 1 else (b["Close"] > line):
-            return ts, float(b["Close"]), "closed back inside the box"
+        inside = (b["Close"] < line) if d == 1 else (b["Close"] > line)
+        run = run + 1 if inside else 0
+        if run >= FAIL_CLOSES:
+            return ts, float(b["Close"]), f"{FAIL_CLOSES} closes in a row back inside the box"
     return None
 
 
@@ -482,7 +488,7 @@ def failed_text(r, ts, close, why, trend):
     f = lambda x: f"{x:,.{dec}f}"
     side = "LONG" if int(r["dir"]) == 1 else "SHORT"
     return (f"FAILED: {r['contract']} {r['tf']} {side} from the {dt.datetime.fromisoformat(str(r['scan_time'])):%I:%M %p} alert\n"
-            f"15m bar at {ts:%I:%M %p} {why} (close {f(close)}; entry {f(float(r['entry']))}, "
+            f"15m bar at {ts:%I:%M %p}: {why} (close {f(close)}; entry {f(float(r['entry']))}, "
             f"stop {f(float(r['stop']))}).\n"
             f"15m trend now {TREND_WORD[trend]}. If you're in it, the setup is no longer valid.")
 
