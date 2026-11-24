@@ -1,18 +1,15 @@
 # Zen Futures (Asia session)
 
-**asia mid** · Mon 11/23 08:57 PM Central
+**asia open** · Tue 11/24 05:18 PM Central
 
 ```
-===== FUTURES · ASIA ASIA MID · Mon 11/23 08:57 PM Central =====
+===== FUTURES · ASIA ASIA OPEN · Tue 11/24 05:18 PM Central =====
 No box breakouts retesting right now.
 
-Box watch:
-  MNQ 15m inside box 26,702.00-26,995.00  now 26,817.00
-
 Key levels (15-min bars, Central):
-  MES now 7,264.75 | Prior day high 7,313.25  Prior day low 6,992.00  NY high 7,313.25  NY low 7,167.00  NY close 7,257.75  Overnight high 7,298.25  Overnight low 7,239.50
-  MNQ now 26,817.00 | Prior day high 27,137.00  Prior day low 25,462.00  NY high 27,137.00  NY low 26,450.25  NY close 26,818.25  Overnight high 27,036.00  Overnight low 26,684.00
-  MGC now 3,641.1 | Prior day high 3,691.0  Prior day low 3,566.3  NY high 3,691.0  NY low 3,629.8  NY close 3,635.5  Overnight high 3,676.7  Overnight low 3,618.5
+  MES now 7,215.75 | Prior day high 7,298.25  Prior day low 7,144.75  NY high 7,240.75  NY low 7,152.25  NY close 7,220.25  Overnight high 7,224.00  Overnight low 7,212.50
+  MNQ now 26,308.25 | Prior day high 27,036.00  Prior day low 25,998.00  NY high 26,509.75  NY low 25,998.00  NY close 26,284.00  Overnight high 26,350.75  Overnight low 26,279.50
+  MGC now 3,555.5 | Prior day high 3,676.7  Prior day low 3,545.4  NY high 3,631.3  NY low 3,545.4  NY close 3,551.5  Overnight high 3,562.0  Overnight low 3,555.5
 ```
 
 Entry = broken box edge, stop = box 50%, target = next box. Research tool, not financial advice.
