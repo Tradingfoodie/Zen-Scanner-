@@ -1,6 +1,6 @@
 # Zen Scanner
 
-**Scan 2026-11-26** · Thu 11/26 11:27 AM Central
+**Evening scan 2026-11-26** · Thu 11/26 02:17 PM Central
 
 ```
 Scanning 83 tickers... (3-6 min)
@@ -16,8 +16,8 @@ Scanning 83 tickers... (3-6 min)
 ===== TODAY'S PICKS Thu 11/26 =====
 #  TICKER  STRIKE   EXP   COST SC
 1  IWM   P 264    11/27   $41 54L B
-2  IWM   P 262    11/30   $78 51s B
-3  SNAP  P 5      12/04   $18 51s F
+2  SNAP  P 5      12/04   $18 51s F
+3  IWM   P 262    11/30   $78 51s B
 4  AAPL  C 362.5  11/27   $26 50L F
 5  AAPL  C 370    12/04   $68 50s F
 6  NIO   P 2.5    12/18   $13 48w E
