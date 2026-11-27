@@ -1,9 +1,9 @@
 # Zen Futures (Asia session)
 
-**asia open** · Thu 11/26 05:23 PM Central
+**asia mid** · Thu 11/26 09:00 PM Central
 
 ```
-===== FUTURES · ASIA ASIA OPEN · Thu 11/26 05:23 PM Central =====
+===== FUTURES · ASIA ASIA MID · Thu 11/26 09:00 PM Central =====
 No box breakouts retesting right now.
 
 Key levels (15-min bars, Central):
